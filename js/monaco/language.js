@@ -556,6 +556,16 @@ export const completion = {
         insertText: 'addr',
       },
       {
+        label: 'typeof',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'typeof',
+      },
+      {
+        label: 'sizeof',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'sizeof',
+      },
+      {
         label: 'do',
         kind: monaco.languages.CompletionItemKind.Snippet,
         insertText: 'do',
