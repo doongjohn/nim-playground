@@ -1,6 +1,5 @@
 export const highlighter = {
   defaultToken: '',
-  tokenPostfix: '.nim',
 
   keywords: [
     'include', 'import', 'from',
@@ -13,7 +12,7 @@ export const highlighter = {
     'continue', 'break',
     'raise', 'return',
     'yield', 'defer',
-    'discard',
+    'do', 'discard',
 
     'var', 'let', 'const',
     'proc', 'func', 'method',
@@ -29,7 +28,7 @@ export const highlighter = {
 
     'new', 'assert', 'doAssert',
     'cast', 'addr',
-    'do',
+    'typeof', 'sizeof'
   ],
 
   typeKeywords: [
