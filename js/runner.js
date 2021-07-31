@@ -7,8 +7,14 @@ function run(compiler = "", options = [], src = "", cb) {
   const decoder = new TextDecoder();
   postData('https://wandbox.org/api/compile.ndjson', {
     compiler: compiler,
+    'compiler-option-raw': options.join('\n'),
     code: src,
-    'compiler-option-raw': options.join('\n')
+    codes: [
+      {
+        file: 'config.nims',
+        code: '--define: "release"'
+      }
+    ]
   })
     .then(response => {
       const reader = response.getReader();
