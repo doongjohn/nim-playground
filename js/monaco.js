@@ -83,13 +83,17 @@ testE2 A`
       let prevTab = null;
 
       tabMain.el.addEventListener('click', () => {
+        console.log(yay);
         prevTab?.state = editor.saveViewState();
+        prevTab = tabMain;
         editor.setModel(modelMain);
         editor.restoreViewState(tabMain.state);
         editor.focus();
       });
       tabConfig.el.addEventListener('click', () => {
+        console.log(yay);
         prevTab?.state = editor.saveViewState();
+        prevTab = tabConfig;
         editor.setModel(modelConfig);
         editor.restoreViewState(tabConfig.state);
         editor.focus();
