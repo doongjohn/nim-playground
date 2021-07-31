@@ -64,7 +64,35 @@ testE2 A`
         fontSize: '16px',
         theme: 'dracula',
         language: 'nim',
-        value: initialsrc
+      });
+
+      const modelMain = monaco.editor.createModel(initialsrc);
+      const modelConfig = monaco.editor.createModel('--define: "release"');
+      
+      const tabMain = {
+        el: document.getElementById('tab-main'),
+        state: null
+      };
+      const tabConfig = {
+        el:  document.getElementById('tab-config'),
+        state: null
+      };
+
+      editor.setModel(modelMain);
+      editor.focus();
+      let prevTab = null;
+
+      tabMain.el.addEventListener('click', () => {
+        prevTab?.state = editor.saveViewState();
+        editor.setModel(modelMain);
+        editor.restoreViewState(tabMain.state);
+        editor.focus();
+      });
+      tabConfig.el.addEventListener('click', () => {
+        prevTab?.state = editor.saveViewState();
+        editor.setModel(modelConfig);
+        editor.restoreViewState(tabConfig.state);
+        editor.focus();
       });
 
       editor.addAction({
