@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Nim playground</title>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+	</head>
+	<body>
+    <!-- force load font -->
+    <div style="position: absolute; top: 0; visibility:hidden; font-family: 'JetBrains Mono';">_</div>
+
+    <!-- monaco editor -->
+    <div id="container">
+      <div id="editor"></div>
+    </div>
+
+    <!-- compile output window -->
+    <div id="output" tabindex="-1" style="display: none;">> [Compile Output] ...</div>
+    
+    <!-- load scripts -->
+    <script src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script>
+		<script src="https://unpkg.com/browse/monaco-editor@0.26.1/min/vs/loader.js"></script>
+		<script src="js/utils.js"></script>
+		<script src="js/main.js" type="module"></script>
+	</body>
+</html>
