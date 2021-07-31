@@ -5,10 +5,106 @@ import * as Language from './monaco/language.js';
 
 export function init() {
   const proxy = URL.createObjectURL(new Blob([`
-self.MonacoEnvironment = {baseUrl: 'https://unpkg.com/monaco-editor@latest/min/'};
+self.MonacoEnvironment = {baseUrl:'https://unpkg.com/monaco-editor@latest/min/'};
 importScripts('https://unpkg.com/monaco-editor@latest/min/vs/base/worker/workerMain.js');
 `], { type: 'text/javascript' }));
   window.MonacoEnvironment = { getWorkerUrl: () => proxy };
+
+  require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
+  require(['vs/editor/editor.main'], monaco => initMonaco(monaco));
+}
+
+function initMonaco(monaco) {
+  monaco.editor.defineTheme('dracula', Theme.dracula);
+  monaco.languages.register({ id: 'nim' });
+  monaco.languages.setMonarchTokensProvider('nim', Syntax.highlighter);
+  monaco.languages.setLanguageConfiguration('nim', Language.settings);
+  monaco.languages.registerCompletionItemProvider('nim', Language.completion);
+
+  const editor = monaco.editor.create(document.getElementById('editor'), {
+    automaticLayout: true,
+    padding: { top: "18em" },
+    smoothScrolling: true,
+    mouseWheelZoom: true,
+    cursorSmoothCaretAnimation: true,
+    renderWhitespace: 'trailing',
+    minimap: { enabled: false },
+    suggest: {
+      showWords: true,
+      showSnippets: true,
+      snippetsPreventQuickSuggestions: false,
+    },
+    snippetSuggestions: 'bottom',
+    tabSize: 2,
+    fontFamily: '"JetBrains Mono", monospace',
+    fontSize: '16px',
+    theme: 'dracula',
+    language: 'nim',
+  });
+
+  initAction(editor);
+  initTabs(editor);
+}
+
+function initAction(editor) {
+  editor.addAction({
+    id: 'nim-run',
+    label: 'Run Nim',
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+    run: function (ed) {
+      Runner.outputWindowShow();
+      Runner.outputWindowText('sending a request to wandbox api...');
+      Runner.runNim(ed);
+      return null;
+    }
+  });
+  editor.addAction({
+    id: 'nim-output-toggle',
+    label: 'Toggle Output Window',
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_BACKTICK],
+    run: function (ed) {
+      Runner.outputWindowToggle();
+      return null;
+    }
+  });
+}
+
+class EditorTab {
+  static editor = null;
+  static container = null;
+  static prevTab = null;
+
+  constructor(fileName, content, language) {
+    this.btn = EditorTab.container.appendChild(document.createElement('div'));
+    this.btn.innerText = fileName;
+    this.btn.addEventListener('click', () => {
+      this.setTab(EditorTab.editor);
+    });
+    this.model = monaco.editor.createModel(content, language);
+    this.state = null;
+  }
+  getData() {
+    return {
+      fileName: this.btn.innerText,
+      content: this.model.getValue()
+    }
+  }
+  setTab() {
+    if (EditorTab.prevTab)
+      EditorTab.prevTab.state = EditorTab.editor.saveViewState();
+    EditorTab.prevTab = this;
+
+    EditorTab.editor.setModel(this.model);
+    EditorTab.editor.restoreViewState(this.state);
+    EditorTab.editor.focus();
+  }
+}
+
+function initTabs(editor) {
+  // TODO: finish tabs
+
+  EditorTab.editor = editor;
+  EditorTab.container = document.getElementById('tabs');
 
   const initialsrc =
     `# Keybindings
@@ -35,90 +131,6 @@ proc testE2(e: E2) = echo typeof e
 testE1 A
 testE2 A`
 
-  require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
-  require(
-    ['vs/editor/editor.main'],
-    () => {
-      monaco.editor.defineTheme('dracula', Theme.dracula);
-      monaco.languages.register({ id: 'nim' });
-      monaco.languages.setMonarchTokensProvider('nim', Syntax.highlighter);
-      monaco.languages.setLanguageConfiguration('nim', Language.settings);
-      monaco.languages.registerCompletionItemProvider('nim', Language.completion);
-
-      const editor = monaco.editor.create(document.getElementById('editor'), {
-        automaticLayout: true,
-        padding: { top: "18em" },
-        smoothScrolling: true,
-        mouseWheelZoom: true,
-        cursorSmoothCaretAnimation: true,
-        renderWhitespace: 'trailing',
-        minimap: { enabled: false },
-        suggest: {
-          showWords: true,
-          showSnippets: true,
-          snippetsPreventQuickSuggestions: false,
-        },
-        snippetSuggestions: 'bottom',
-        tabSize: 2,
-        fontFamily: '"JetBrains Mono", monospace',
-        fontSize: '16px',
-        theme: 'dracula',
-        language: 'nim',
-      });
-
-      const modelMain = monaco.editor.createModel(initialsrc);
-      const modelConfig = monaco.editor.createModel('--define: "release"');
-      
-      const tabMain = {
-        el: document.getElementById('tab-main'),
-        state: null
-      };
-      const tabConfig = {
-        el:  document.getElementById('tab-config'),
-        state: null
-      };
-
-      editor.setModel(modelMain);
-      editor.focus();
-      let prevTab = null;
-
-      tabMain.el.addEventListener('click', () => {
-        console.log(yay);
-        if (prevTab) prevTab.state = editor.saveViewState();
-        prevTab = tabMain;
-        editor.setModel(modelMain);
-        editor.restoreViewState(tabMain.state);
-        editor.focus();
-      });
-      tabConfig.el.addEventListener('click', () => {
-        console.log(yay);
-        if (prevTab) prevTab.state = editor.saveViewState();
-        prevTab = tabConfig;
-        editor.setModel(modelConfig);
-        editor.restoreViewState(tabConfig.state);
-        editor.focus();
-      });
-
-      editor.addAction({
-        id: 'nim-run',
-        label: 'Run Nim',
-        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-        run: function (ed) {
-          Runner.outputWindowShow();
-          Runner.outputWindowText('sending a request to wandbox api...');
-          Runner.runNim(ed);
-          return null;
-        }
-      });
-      editor.addAction({
-        id: 'nim-output-toggle',
-        label: 'Toggle Output Window',
-        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_BACKTICK],
-        run: function (ed) {
-          Runner.outputWindowToggle();
-          return null;
-        }
-      });
-    }
-  );
+  new EditorTab('main.nim', initialsrc, 'nim').setTab();
+  new EditorTab('config.nims', '--define: "release"', 'nim');
 }
