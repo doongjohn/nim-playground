@@ -84,7 +84,7 @@ testE2 A`
 
       tabMain.el.addEventListener('click', () => {
         console.log(yay);
-        prevTab?.state = editor.saveViewState();
+        if (prevTab) prevTab.state = editor.saveViewState();
         prevTab = tabMain;
         editor.setModel(modelMain);
         editor.restoreViewState(tabMain.state);
@@ -92,7 +92,7 @@ testE2 A`
       });
       tabConfig.el.addEventListener('click', () => {
         console.log(yay);
-        prevTab?.state = editor.saveViewState();
+        if (prevTab) prevTab.state = editor.saveViewState();
         prevTab = tabConfig;
         editor.setModel(modelConfig);
         editor.restoreViewState(tabConfig.state);
