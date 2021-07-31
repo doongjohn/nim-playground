@@ -17,13 +17,23 @@ importScripts('https://unpkg.com/monaco-editor@latest/min/vs/base/worker/workerM
 # ctrl + \`     -> toggle the output window
 # esc          -> hide the output window
 
-# Snippets
-# pragma, import, proc, func
-
 import std/strformat
 
 const nim = "awesome"
-echo "{nim = }".fmt`
+echo "{nim = }".fmt
+
+
+{.experimental: "overloadableEnums".}
+
+type
+  E1 = enum A, B
+  E2 = enum A, B
+
+proc testE1(e: E1) = echo typeof e
+proc testE2(e: E2) = echo typeof e
+
+testE1 A
+testE2 A`
 
   require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
   require(
