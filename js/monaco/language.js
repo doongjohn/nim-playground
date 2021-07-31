@@ -441,6 +441,11 @@ export const completion = {
         insertText: 'defer',
       },
       {
+        label: 'do',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'do',
+      },
+      {
         label: 'discard',
         kind: monaco.languages.CompletionItemKind.Snippet,
         insertText: 'discard',
@@ -643,6 +648,171 @@ export const completion = {
       },
       {
         label: 'false',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'int',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'int8',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'int16',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'int32',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'int64',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'uint',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'uint8',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'uint16',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'uint32',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'uint64',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'float',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'float32',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'float64',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'char',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'string',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cchar',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cuchar',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cschar',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cshort',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cushort',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'clong',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'culong',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'clonglong',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'culonglong',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cint',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cuint',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'csize',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'csize_t',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cfloat',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cdouble',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'clongdouble',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cstringArray',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: 'false',
+      },
+      {
+        label: 'cstring',
         kind: monaco.languages.CompletionItemKind.Snippet,
         insertText: 'false',
       },
