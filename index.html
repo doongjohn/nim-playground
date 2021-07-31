@@ -10,7 +10,9 @@
     <div style="position: absolute; top: 0; visibility:hidden; font-family: 'JetBrains Mono';">_</div>
 
     <!-- tabs -->
-    <div id="tabs"></div>
+    <div id="tabs">
+      <div id="new-tab">+</div>
+    </div>
 
     <!-- monaco editor -->
     <div id="container">
@@ -19,6 +21,12 @@
 
     <!-- compile output window -->
     <div id="output" tabindex="-1" style="display: none;">> [Compile Output] ...</div>
+
+    <!-- tab context menu -->
+    <div id="tab-context-menu">
+      <div>Rename ✏️</div>
+      <div>Delete ❌</div>
+    </div>
 
     <!-- load scripts -->
     <script src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script>

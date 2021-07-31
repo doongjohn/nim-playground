@@ -5,6 +5,46 @@ body {
   padding: 0;
   height: 100%;
 }
+#tabs {
+  z-index: 99;
+  position: fixed;
+  display: flex;
+  font-size: 15px;
+  font-family: 'JetBrains Mono';
+  color: white;
+  background-color: transparent;
+}
+#tabs > div {
+  cursor: pointer;
+  user-select: none;
+  margin-right: 0.1em;
+  padding: 0.5em 1em;
+  background-color: hsl(231, 15%, 16%);
+}
+#tabs > .selected {
+  background-color: #323547;
+}
+#tabs > div:hover {
+  background-color: #3f435a;
+}
+#tab-context-menu {
+  z-index: 200;
+  position: fixed;
+  cursor: pointer;
+  font-family: 'JetBrains Mono';
+  width: fit-content;
+  color: white;
+  background-color: hsl(231, 15%, 16%);
+}
+#tab-context-menu > div {
+  user-select: none;
+  padding: 0.5em 1em;
+  width: fit-content;
+  height: 100%;
+}
+#tab-context-menu > div:hover {
+  background-color: #3f435a;
+}
 #container {
   margin: 0;
   padding: 0;

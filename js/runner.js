@@ -1,24 +1,19 @@
 let compile_options = ['--threads:on'];
 let wandboxstream = null;
 
-function run(compiler = "", options = [], src = "", cb) {
+function run(compiler = "", options = [], mainSrc = "", srcFiles = [], cb) {
   // Wandbox API: https://github.com/melpon/wandbox/blob/master/kennel2/API.rst
   // ReadableStream: https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
   const decoder = new TextDecoder();
   postData('https://wandbox.org/api/compile.ndjson', {
     compiler: compiler,
     'compiler-option-raw': options.join('\n'),
-    code: src,
-    codes: [
-      {
-        file: 'config.nims',
-        code: '--define: "release"'
-      }
-    ]
+    code: mainSrc,
+    codes: srcFiles
   })
     .then(response => {
       const reader = response.getReader();
-      wandboxstream ?.cancel();
+      wandboxstream?.cancel();
       wandboxstream = new ReadableStream({
         start(controller) {
           function push() {
@@ -98,7 +93,19 @@ function printOutput(msg) {
   output.scrollTop = output.scrollHeight;
 }
 
-export function runNim(editor) {
+export function runNim(tabs) {
   output.innerText = '';
-  run(compilers.nim_head, compile_options, editor.getValue(), printOutput);
+  run(
+    compilers.nim_head,
+    compile_options,
+    tabs[0].getData().content,
+    tabs.slice(1).map(i => {
+      let data = i.getData();
+      return {
+        file: data.fileName,
+        code: data.content,
+      };
+    }),
+    printOutput
+  );
 }

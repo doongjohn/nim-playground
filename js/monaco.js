@@ -23,7 +23,7 @@ function initMonaco(monaco) {
 
   const editor = monaco.editor.create(document.getElementById('editor'), {
     automaticLayout: true,
-    padding: { top: "18em" },
+    padding: { top: "45em" },
     smoothScrolling: true,
     mouseWheelZoom: true,
     cursorSmoothCaretAnimation: true,
@@ -54,7 +54,7 @@ function initAction(editor) {
     run: function (ed) {
       Runner.outputWindowShow();
       Runner.outputWindowText('sending a request to wandbox api...');
-      Runner.runNim(ed);
+      Runner.runNim(EditorTab.tabs);
       return null;
     }
   });
@@ -72,41 +72,63 @@ function initAction(editor) {
 class EditorTab {
   static editor = null;
   static container = null;
+  static contextMenu = null;
+  static newBtn = null;
+  static tabs = [];
   static prevTab = null;
 
   constructor(fileName, content, language) {
     this.btn = EditorTab.container.appendChild(document.createElement('div'));
     this.btn.innerText = fileName;
-    this.btn.addEventListener('click', () => {
-      this.setTab(EditorTab.editor);
+    this.btn.addEventListener('click', input => {
+      if (input.button == 0)
+        this.select();
     });
+    this.btn.addEventListener('contextmenu', event => {
+      event.preventDefault();
+      const x = event.clientX;
+      const y = event.clientY;
+      EditorTab.contextMenu.style.left = x + 'px';
+      EditorTab.contextMenu.style.top = y + 'px';
+      EditorTab.contextMenu.style.display = 'block';
+    });
+    EditorTab.container.appendChild(EditorTab.newBtn);
     this.model = monaco.editor.createModel(content, language);
     this.state = null;
   }
   getData() {
-    return {
-      fileName: this.btn.innerText,
-      content: this.model.getValue()
-    }
+    return { fileName: this.btn.innerText, content: this.model.getValue() }
   }
-  setTab() {
-    if (EditorTab.prevTab)
+  select() {
+    if (EditorTab.prevTab) {
       EditorTab.prevTab.state = EditorTab.editor.saveViewState();
+      EditorTab.prevTab.btn.classList.remove('selected');
+    }
     EditorTab.prevTab = this;
-
     EditorTab.editor.setModel(this.model);
     EditorTab.editor.restoreViewState(this.state);
     EditorTab.editor.focus();
+    this.btn.classList.add('selected');
   }
 }
 
 function initTabs(editor) {
-  // TODO: finish tabs
-
   EditorTab.editor = editor;
   EditorTab.container = document.getElementById('tabs');
+  // TODO: finish context menu
+  EditorTab.contextMenu = document.getElementById('tab-context-menu');
+  document.addEventListener('click', event => {
+    if (event.target.parentNode != EditorTab.contextMenu)
+      EditorTab.contextMenu.style.display = 'none';
+  });
+  EditorTab.newBtn = document.getElementById('new-tab');
+  EditorTab.newBtn.addEventListener('click', () => {
+    const tab = new EditorTab('src.nim', '', 'nim');
+    tab.btn.setAttribute("contenteditable", true);
+    EditorTab.tabs.push(tab);
+  });
 
-  const initialsrc =
+  const nimcode =
     `# Keybindings
 # F1           -> command palette
 # ctrl + enter -> run your nim code
@@ -131,6 +153,10 @@ proc testE2(e: E2) = echo typeof e
 testE1 A
 testE2 A`
 
-  new EditorTab('main.nim', initialsrc, 'nim').setTab();
-  new EditorTab('config.nims', '--define: "release"', 'nim');
+  EditorTab.tabs = [
+    new EditorTab('main.nim', nimcode, 'nim'),
+    new EditorTab('config.nims', '--define: "release"', 'nim'),
+  ];
+
+  EditorTab.tabs[0].select();
 }
