@@ -12,7 +12,7 @@ body {
   font-size: 15px;
   font-family: 'JetBrains Mono';
   color: white;
-  background-color: transparent;
+  background-color: hsl(231, 15%, 16%);
 }
 #tabs > div {
   cursor: pointer;
@@ -20,6 +20,9 @@ body {
   margin-right: 0.1em;
   padding: 0.5em 1em;
   background-color: hsl(231, 15%, 16%);
+}
+#tabs > div:last-child {
+  margin: 0;
 }
 #tabs > .selected {
   background-color: #323547;
@@ -29,6 +32,7 @@ body {
 }
 #tab-context-menu {
   z-index: 200;
+  display: none;
   position: fixed;
   cursor: pointer;
   font-family: 'JetBrains Mono';

@@ -91,6 +91,7 @@ class EditorTab {
       EditorTab.contextMenu.style.left = x + 'px';
       EditorTab.contextMenu.style.top = y + 'px';
       EditorTab.contextMenu.style.display = 'block';
+      console.log(event.target);
     });
     EditorTab.container.appendChild(EditorTab.newBtn);
     this.model = monaco.editor.createModel(content, language);
@@ -116,6 +117,8 @@ function initTabs(editor) {
   EditorTab.editor = editor;
   EditorTab.container = document.getElementById('tabs');
   // TODO: finish context menu
+  // https://itnext.io/how-to-create-a-custom-right-click-menu-with-javascript-9c368bb58724
+  // check name collision when renaming
   EditorTab.contextMenu = document.getElementById('tab-context-menu');
   document.addEventListener('click', event => {
     if (event.target.parentNode != EditorTab.contextMenu)
@@ -124,7 +127,7 @@ function initTabs(editor) {
   EditorTab.newBtn = document.getElementById('new-tab');
   EditorTab.newBtn.addEventListener('click', () => {
     const tab = new EditorTab('src.nim', '', 'nim');
-    tab.btn.setAttribute("contenteditable", true);
+    // tab.btn.setAttribute("contenteditable", true);
     EditorTab.tabs.push(tab);
   });
 
