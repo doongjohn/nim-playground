@@ -53,13 +53,13 @@ export function init() {
   // init output window
   output = document.getElementById('output');
   let ctrlDown = false;
-  window.addEventListener('keyup', e => ctrlDown = e.keyCode == 17 ? false : ctrlDown);
+  window.addEventListener('keyup', e => ctrlDown = e.key == 'Control' ? false : ctrlDown);
   window.addEventListener('keydown', e => {
-    if (e.keyCode == 17)
+    if (e.key == 'Control')
       ctrlDown = true;
-    if (e.keyCode == 27)
+    if (e.key == 'Escape')
       outputWindowHide();
-    if (ctrlDown && e.keyCode == 192)
+    if (ctrlDown && e.key == '`')
       outputWindowToggle();
   });
 }
