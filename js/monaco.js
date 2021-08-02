@@ -11,140 +11,125 @@ importScripts('https://unpkg.com/monaco-editor@latest/min/vs/base/worker/workerM
   window.MonacoEnvironment = { getWorkerUrl: () => proxy };
 
   require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
-  require(['vs/editor/editor.main'], monaco => initMonaco(monaco));
+  require(['vs/editor/editor.main'], monaco => {
+    Monaco.monaco = monaco;
+    Monaco.init();
+    EditorTab.init();
+  });
 }
 
-function initMonaco(monaco) {
-  monaco.editor.defineTheme('dracula', Theme.dracula);
-  monaco.languages.register({ id: 'nim' });
-  monaco.languages.setMonarchTokensProvider('nim', Syntax.highlighter);
-  monaco.languages.setLanguageConfiguration('nim', Language.settings);
-  monaco.languages.registerCompletionItemProvider('nim', Language.completion);
+class Monaco {
+  static monaco = null;
+  static editor = null;
 
-  const editor = monaco.editor.create(document.getElementById('editor'), {
-    automaticLayout: true,
-    padding: { top: "45em" },
-    smoothScrolling: true,
-    mouseWheelZoom: true,
-    cursorSmoothCaretAnimation: true,
-    renderWhitespace: 'trailing',
-    minimap: { enabled: false },
-    suggest: {
-      showWords: true,
-      showSnippets: true,
-      snippetsPreventQuickSuggestions: false,
-    },
-    snippetSuggestions: 'bottom',
-    tabSize: 2,
-    fontFamily: '"JetBrains Mono", monospace',
-    fontSize: '16px',
-    theme: 'dracula',
-    language: 'nim',
-  });
+  static init() {
+    const monaco = Monaco.monaco;
+    monaco.editor.defineTheme('dracula', Theme.dracula);
+    monaco.languages.register({ id: 'nim' });
+    monaco.languages.setMonarchTokensProvider('nim', Syntax.highlighter);
+    monaco.languages.setLanguageConfiguration('nim', Language.settings);
+    monaco.languages.registerCompletionItemProvider('nim', Language.completion);
 
-  initAction(editor);
-  initTabs(editor);
-}
+    Monaco.editor = monaco.editor.create(document.getElementById('editor'), {
+      automaticLayout: true,
+      padding: { top: "15em" },
+      smoothScrolling: true,
+      mouseWheelZoom: true,
+      cursorSmoothCaretAnimation: true,
+      renderWhitespace: 'trailing',
+      minimap: { enabled: false },
+      suggest: {
+        showWords: true,
+        showSnippets: true,
+        snippetsPreventQuickSuggestions: false,
+      },
+      snippetSuggestions: 'bottom',
+      tabSize: 2,
+      fontFamily: '"JetBrains Mono", monospace',
+      fontSize: '16px',
+      theme: 'dracula',
+      language: 'nim',
+    });
 
-function initAction(editor) {
-  editor.addAction({
-    id: 'nim-run',
-    label: 'Run Nim',
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-    run: function (ed) {
-      Runner.outputWindowShow();
-      Runner.outputWindowText('sending a request to wandbox api...');
-      Runner.runNim(EditorTab.tabs);
-      return null;
-    }
-  });
-  editor.addAction({
-    id: 'nim-output-toggle',
-    label: 'Toggle Output Window',
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_BACKTICK],
-    run: function (ed) {
-      Runner.outputWindowToggle();
-      return null;
-    }
-  });
+    Monaco.editor.addAction({
+      id: 'nim-run',
+      label: 'Run Nim',
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: function (ed) {
+        Runner.outputWindowShow();
+        Runner.outputWindowText('sending a request to wandbox api...');
+        Runner.runNim(EditorTab.tabs);
+        return null;
+      }
+    });
+    Monaco.editor.addAction({
+      id: 'nim-output-toggle',
+      label: 'Toggle Output Window',
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_BACKTICK],
+      run: function (ed) {
+        Runner.outputWindowToggle();
+        return null;
+      }
+    });
+  }
 }
 
 class EditorTab {
-  static editor = null;
   static container = null;
   static contextMenu = null;
+  static contextRename = null;
+  static contextDelete = null;
   static newBtn = null;
+
   static tabs = [];
-  static prevTab = null;
+  static currentTab = null;
+  static contextTab = null;
+  static counter = 0;
 
-  constructor(fileName, content, language) {
-    this.btn = EditorTab.container.appendChild(document.createElement('div'));
-    this.btn.innerText = fileName;
-    this.btn.addEventListener('click', input => {
-      if (input.button == 0)
-        this.select();
+  static init() {
+    // get elements
+    EditorTab.container = document.getElementById('tab-container');
+    EditorTab.contextMenu = document.getElementById('tab-context-menu');
+    EditorTab.newBtn = document.getElementById('tab-new');
+
+    // init container
+    EditorTab.container.addEventListener('wheel', function (event) {
+      // side scroll
+      this.scrollLeft += event.deltaY > 0 ? 50 : -50;
     });
-    this.btn.addEventListener('contextmenu', event => {
-      event.preventDefault();
-      const x = event.clientX;
-      const y = event.clientY;
-      EditorTab.contextMenu.style.left = x + 'px';
-      EditorTab.contextMenu.style.top = y + 'px';
-      EditorTab.contextMenu.style.display = 'block';
-      console.log(event.target);
+
+    // init new tab button
+    EditorTab.newBtn.addEventListener('click', () => {
+      const newTab = new EditorTab(`src${EditorTab.counter++}.nim`, '', 'nim');
+      // newTab.tab.setAttribute("contenteditable", true);
+      EditorTab.tabs.push(newTab);
     });
-    EditorTab.container.appendChild(EditorTab.newBtn);
-    this.model = monaco.editor.createModel(content, language);
-    this.state = null;
-  }
-  getData() {
-    return { fileName: this.btn.innerText, content: this.model.getValue() }
-  }
-  select() {
-    if (EditorTab.prevTab) {
-      EditorTab.prevTab.state = EditorTab.editor.saveViewState();
-      EditorTab.prevTab.btn.classList.remove('selected');
-    }
-    EditorTab.prevTab = this;
-    EditorTab.editor.setModel(this.model);
-    EditorTab.editor.restoreViewState(this.state);
-    EditorTab.editor.focus();
-    this.btn.classList.add('selected');
-  }
-}
 
-function initTabs(editor) {
-  EditorTab.editor = editor;
-  EditorTab.container = document.getElementById('tabs');
-  // TODO: finish context menu
-  // https://itnext.io/how-to-create-a-custom-right-click-menu-with-javascript-9c368bb58724
-  // check name collision when renaming
-  EditorTab.contextMenu = document.getElementById('tab-context-menu');
-  document.addEventListener('click', event => {
-    if (event.target.parentNode != EditorTab.contextMenu)
-      EditorTab.contextMenu.style.display = 'none';
-  });
-  EditorTab.newBtn = document.getElementById('new-tab');
-  EditorTab.newBtn.addEventListener('click', () => {
-    const tab = new EditorTab('src.nim', '', 'nim');
-    // tab.btn.setAttribute("contenteditable", true);
-    EditorTab.tabs.push(tab);
-  });
+    // init tab context menu
+    // https://itnext.io/how-to-create-a-custom-right-click-menu-with-javascript-9c368bb58724
+    // TODO: check name collision when renaming
+    document.addEventListener('click', event => {
+      if (event.target.parentNode != EditorTab.contextMenu)
+        EditorTab.contextMenu.style.display = 'none';
+    });
 
-  const nimcode =
-    `# Keybindings
+    // create default tabs
+    EditorTab.createDefault();
+  }
+  static createDefault() {
+    const nimcode =
+      `# Keybindings
 # F1           -> command palette
 # ctrl + enter -> run your nim code
 # ctrl + \`     -> toggle the output window
 # esc          -> hide the output window
 
+{.experimental: "overloadableEnums".}
+
 import std/strformat
 
 const nim = "awesome"
 echo "{nim = }".fmt
-
-
-{.experimental: "overloadableEnums".}
 
 type
   E1 = enum A, B
@@ -154,12 +139,74 @@ proc testE1(e: E1) = echo typeof e
 proc testE2(e: E2) = echo typeof e
 
 testE1 A
-testE2 A`
+testE2 A
+`
 
-  EditorTab.tabs = [
-    new EditorTab('main.nim', nimcode, 'nim'),
-    new EditorTab('config.nims', '--define: "release"', 'nim'),
-  ];
+    const nimconfig =
+      `--define: "release"
+`
 
-  EditorTab.tabs[0].select();
+    // default tabs
+    EditorTab.tabs = [
+      new EditorTab('main.nim', nimcode, 'nim'),
+      new EditorTab('config.nims', nimconfig, 'nim'),
+    ];
+
+    // select first tab
+    EditorTab.currentTab = EditorTab.tabs[0];
+    EditorTab.currentTab.select();
+  }
+
+  constructor(fileName, content, language) {
+    this.tab = EditorTab.container.appendChild(document.createElement('div'));
+    this.tab.innerText = fileName;
+    this.tab.addEventListener('click', event => {
+      // select this tab on left click
+      if (event.button == 0)
+        this.select();
+    });
+    this.tab.addEventListener('contextmenu', event => {
+      // disable browser context menu
+      event.preventDefault();
+      EditorTab.contextTab = event.target;
+
+      // move context menu to cursor postion
+      EditorTab.contextMenu.style.left = event.clientX + 'px';
+      EditorTab.contextMenu.style.top = event.clientY + 'px';
+
+      // show context menu
+      EditorTab.contextMenu.style.display = 'block';
+    });
+    EditorTab.container.appendChild(EditorTab.newBtn);
+
+    this.model = monaco.editor.createModel(content, language);
+    this.state = null;
+  }
+
+  getData() {
+    return {
+      fileName: this.tab.innerText,
+      content: this.model.getValue()
+    };
+  }
+  deselect() {
+    this.state = Monaco.editor.saveViewState();
+    this.tab.classList.remove('selected');
+  }
+  select() {
+    EditorTab.currentTab?.deselect();
+    EditorTab.currentTab = this;
+
+    Monaco.editor.setModel(this.model);
+    Monaco.editor.restoreViewState(this.state);
+    Monaco.editor.focus();
+    this.tab.classList.add('selected');
+  }
+  remove() {
+    let index = EditorTab.tabs.indexOf(this);
+    if (index == -1) return;
+
+    // remove from tabs
+    EditorTab.tabs.splice(index, 1);
+  }
 }
