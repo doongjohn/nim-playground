@@ -1,4 +1,4 @@
-let compile_options = ['--threads:on'];
+let compile_options = [''];
 let wandboxstream = null;
 
 function run(compiler = "", options = [], mainSrc = "", srcFiles = [], cb) {
