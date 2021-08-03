@@ -56,9 +56,9 @@ class Monaco {
       label: 'Run Nim',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
       run: function (ed) {
-        Runner.outputWindowShow();
         Runner.outputWindowText('sending a request to wandbox api...');
-        Runner.runNim(EditorTab.tabs);
+        Runner.outputWindowShow();
+        Runner.wandboxRunNim(EditorTab.tabs);
         return null;
       }
     });
@@ -71,6 +71,32 @@ class Monaco {
         return null;
       }
     });
+  }
+}
+
+function getFileExtension(fileName) {
+  const fileTypes = {
+    nim: 'nim',
+    nims: 'nim',
+    txt: 'text',
+  }
+
+  const dot = fileName.lastIndexOf('.');
+  if (dot == -1 || fileName.length == dot - 1)
+    return 'text';
+  return fileTypes[fileName.substring(dot + 1)];
+}
+
+class EditorTabOption {
+  constructor(fileName, content) {
+    this.fileName = fileName;
+    this.content = content;
+  }
+}
+class EditorStaticTabOption {
+  constructor(id, content) {
+    this.id = id;
+    this.content = content;
   }
 }
 
@@ -100,7 +126,7 @@ class EditorTab {
 
     // init new tab button
     EditorTab.newBtn.addEventListener('click', () => {
-      const newTab = new EditorTab(`src${EditorTab.counter++}.nim`, '', 'nim');
+      const newTab = new EditorTab(new EditorTabOption(`src${EditorTab.counter++}.nim`, ''));
       // newTab.tab.setAttribute("contenteditable", true);
       EditorTab.tabs.push(newTab);
     });
@@ -144,12 +170,13 @@ testE2 A
 
     const nimconfig =
       `--define: "release"
+--gc: "orc"
 `
 
     // default tabs
     EditorTab.tabs = [
-      new EditorTab('main.nim', nimcode, 'nim'),
-      new EditorTab('config.nims', nimconfig, 'nim'),
+      new EditorTab(new EditorStaticTabOption('code-main', nimcode)),
+      new EditorTab(new EditorStaticTabOption('code-config', nimconfig)),
     ];
 
     // select first tab
@@ -157,37 +184,69 @@ testE2 A
     EditorTab.currentTab.select();
   }
 
-  constructor(fileName, content, language) {
-    this.tab = EditorTab.container.appendChild(document.createElement('div'));
-    this.tab.innerText = fileName;
+  constructor(option) {
+    // normal tab
+    if (option instanceof EditorTabOption) {
+      this.tab = EditorTab.container.appendChild(document.createElement('div'));
+      this.tab.innerText = option.fileName;
+      this.tab.addEventListener('contextmenu', event => {
+        // disable browser context menu
+        event.preventDefault();
+        EditorTab.contextTab = event.target;
+
+        // move context menu to cursor postion
+        EditorTab.contextMenu.style.left = event.clientX + 'px';
+        EditorTab.contextMenu.style.top = event.clientY + 'px';
+
+        // show context menu
+        EditorTab.contextMenu.style.display = 'block';
+      });
+      // move the new button to rightmost position
+      EditorTab.container.appendChild(EditorTab.newBtn);
+      // create editor model
+      this.model = Monaco.monaco.editor.createModel(option.content, getFileExtension(option.fileName));
+    }
+    // static tab
+    else if (option instanceof EditorStaticTabOption) {
+      this.tab = document.getElementById(option.id);
+      this.tab.addEventListener('contextmenu', event => {
+        // disable browser context menu
+        event.preventDefault();
+        EditorTab.contextTab = event.target;
+
+        // TODO: use static context meun
+        // move context menu to cursor postion
+        EditorTab.contextMenu.style.left = event.clientX + 'px';
+        EditorTab.contextMenu.style.top = event.clientY + 'px';
+
+        // show context menu
+        EditorTab.contextMenu.style.display = 'block';
+      });
+      // create editor model
+      this.model = Monaco.monaco.editor.createModel(option.content, 'nim');
+    }
+
     this.tab.addEventListener('click', event => {
-      // select this tab on left click
-      if (event.button == 0)
+      if (event.button == 0) // select this tab on left click
         this.select();
     });
-    this.tab.addEventListener('contextmenu', event => {
-      // disable browser context menu
-      event.preventDefault();
-      EditorTab.contextTab = event.target;
-
-      // move context menu to cursor postion
-      EditorTab.contextMenu.style.left = event.clientX + 'px';
-      EditorTab.contextMenu.style.top = event.clientY + 'px';
-
-      // show context menu
-      EditorTab.contextMenu.style.display = 'block';
-    });
-    EditorTab.container.appendChild(EditorTab.newBtn);
-
-    this.model = monaco.editor.createModel(content, language);
     this.state = null;
   }
 
   getData() {
     return {
-      fileName: this.tab.innerText,
-      content: this.model.getValue()
+      // this naming is for the wandbox api
+      file: this.tab.innerText,   // file name
+      code: this.model.getValue() // file content
     };
+  }
+  rename(fileName) {
+    Monaco.monaco.editor.setModelLanguage(this.model, getFileExtension(fileName));
+  }
+  remove() {
+    let index = EditorTab.tabs.indexOf(this);
+    if (index != -1)
+      EditorTab.tabs.splice(index, 1);
   }
   deselect() {
     this.state = Monaco.editor.saveViewState();
@@ -201,12 +260,5 @@ testE2 A
     Monaco.editor.restoreViewState(this.state);
     Monaco.editor.focus();
     this.tab.classList.add('selected');
-  }
-  remove() {
-    let index = EditorTab.tabs.indexOf(this);
-    if (index == -1) return;
-
-    // remove from tabs
-    EditorTab.tabs.splice(index, 1);
   }
 }

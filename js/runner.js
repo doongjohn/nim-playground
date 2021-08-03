@@ -1,59 +1,59 @@
-let compile_options = [''];
+// Wandbox API:    https://github.com/melpon/wandbox/blob/master/kennel2/API.rst
+// ReadableStream: https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+
+const decoder = new TextDecoder();
 let wandboxstream = null;
 
-function run(compiler = "", options = [], mainSrc = "", srcFiles = [], cb) {
-  // Wandbox API: https://github.com/melpon/wandbox/blob/master/kennel2/API.rst
-  // ReadableStream: https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
-  const decoder = new TextDecoder();
+function wandboxRun(compiler = "", options = [], mainSrc = "", srcFiles = [], onReceiveData) {
   postData('https://wandbox.org/api/compile.ndjson', {
     compiler: compiler,
     'compiler-option-raw': options.join('\n'),
     code: mainSrc,
     codes: srcFiles
-  })
-    .then(response => {
-      const reader = response.getReader();
-      wandboxstream?.cancel();
-      wandboxstream = new ReadableStream({
-        start(controller) {
-          function push() {
-            reader.read().then(({ done, value }) => {
-              // If there is no more data to read
-              if (done) {
-                wandboxstream = null;
-                controller.close();
-                return;
-              }
-              controller.enqueue(value);
-              const jsons = decoder.decode(value).split('\n');
-              for (let i = 0; i < jsons.length - 1; i++)
-                cb(JSON.parse(jsons[i]));
-              push();
-            });
-          }
-          push();
-        }
-      });
-    })
-    .catch(error => console.error(error));
+  }).then(response => {
+    const reader = response.getReader();
+    wandboxstream?.cancel();
+    wandboxstream = new ReadableStream({
+      start(controller) {
+        (function loop() {
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              controller.close();
+              wandboxstream = null;
+              return;
+            }
+
+            controller.enqueue(value);
+            const jsons = decoder.decode(value).split('\n');
+            for (const json of (jsons.pop(), jsons))
+              onReceiveData(JSON.parse(json));
+
+            loop();
+          });
+        })();
+      }
+    });
+  }).catch(error => console.error(error));
 }
 
-const compilers = Object.freeze({
-  nim_head: 'nim-head',
-});
-
 let output = null;
-export function init() {
-  // prevent ctrl + s
-  document.addEventListener("keydown", e => {
-    if (e.key === 's' && (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) {
-      e.preventDefault();
-    }
-  }, false);
+let ctrlDown = false;
 
+function isCtrlPressed(event) {
+  return navigator.platform.match('Mac') ? event.metaKey : event.ctrlKey;
+}
+
+export function init() {
   // init output window
   output = document.getElementById('output');
-  let ctrlDown = false;
+
+  // prevent browser ctrl + s
+  document.addEventListener('keydown', event => {
+    if (event.key == 's' && isCtrlPressed(event))
+      event.preventDefault();
+  }, false);
+
+  // init keyboard shortcuts
   window.addEventListener('keyup', e => ctrlDown = e.key == 'Control' ? false : ctrlDown);
   window.addEventListener('keydown', e => {
     if (e.key == 'Control')
@@ -77,8 +77,8 @@ export function outputWindowToggle() {
   output.style.display ? outputWindowShow() : outputWindowHide();
 }
 
-function printOutput(msg) {
-  let str = msg.data;
+function outputWindowUpdate(msg) {
+  const str = msg.data;
   switch (msg.type) {
     case 'Control':
       output.textContent += '> 🎁 [Wandbox]: ' + str + '\n';
@@ -87,25 +87,28 @@ function printOutput(msg) {
       output.textContent += '> 📑 [ExitCode]: ' + str + '\n';
       break;
     default:
-      // TODO: parse ansi -> https://github.com/drudru/ansi_up
+      // TODO: parse ansi code -> https://github.com/drudru/ansi_up
       output.textContent += str;
   }
+  // scroll to bottom
   output.scrollTop = output.scrollHeight;
 }
 
-export function runNim(tabs) {
+
+// TODO: get all nim compilers from wandbox
+const compilers = Object.freeze({
+  nim_head: 'nim-head',
+});
+let compileOptions = [''];
+
+
+export function wandboxRunNim(tabs) {
   output.innerText = '';
-  run(
+  wandboxRun(
     compilers.nim_head,
-    compile_options,
-    tabs[0].getData().content,
-    tabs.slice(1).map(i => {
-      let data = i.getData();
-      return {
-        file: data.fileName,
-        code: data.content,
-      };
-    }),
-    printOutput
+    compileOptions,
+    tabs[0].getData().code,                  // main src
+    tabs.slice(1).map(tab => tab.getData()), // every other src (TODO: run only nim files)
+    outputWindowUpdate
   );
 }
