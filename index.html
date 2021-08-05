@@ -12,19 +12,19 @@
   <div style="position:absolute;visibility:hidden;font-family:'JetBrains Mono';">_</div>
 
   <!-- tabs -->
-  <div id="tab-bar">
+  <div id="tab-bar" spellcheck="false">
     <div id="tab-container">
       <img src="https://forum.nim-lang.org/images/logo.png" alt="" style="height:18px;padding:8px;">
-      <div id="code-config">config.nims</div>
-      <div id="code-main">main.nim</div>
+      <div id="code-config" style="padding-bottom:0;border-bottom:0.15em solid #aaaaaa;">config.nims</div>
+      <div id="code-main" style="padding-bottom:0;border-bottom:0.15em solid #aaaaaa;">prog.nim</div>
       <div id="tab-new">+</div>
     </div>
   </div>
 
   <!-- tab context menu -->
   <div id="tab-context-menu">
-    <div><span style="display:inline-block;text-align:center;width:30px;">✎</span>Rename</div>
-    <div><span style="display:inline-block;text-align:center;width:30px;">🗑</span>Delete</div>
+    <div id="tab-context-rename"><span style="display:inline-block;text-align:center;width:30px;">✎</span>Rename</div>
+    <div id="tab-context-delete"><span style="display:inline-block;text-align:center;width:30px;">🗑</span>Delete</div>
   </div>
 
   <!-- monaco editor -->
@@ -37,7 +37,6 @@
 
   <!-- load scripts -->
   <script src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script>
-  <!-- <script src="https://unpkg.com/browse/monaco-editor@0.26.1/min/vs/loader.js"></script> -->
   <script src="js/utils.js"></script>
   <script src="js/main.js" type="module"></script>
 </body>

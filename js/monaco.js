@@ -15,6 +15,7 @@ importScripts('https://unpkg.com/monaco-editor@latest/min/vs/base/worker/workerM
     Monaco.monaco = monaco;
     Monaco.init();
     EditorTab.init();
+    EditorTab.initStaticTabs();
   });
 }
 
@@ -88,15 +89,15 @@ function getFileExtension(fileName) {
 }
 
 class EditorTabOption {
-  constructor(fileName, content) {
+  constructor(fileName, code) {
     this.fileName = fileName;
-    this.content = content;
+    this.code = code;
   }
 }
 class EditorStaticTabOption {
-  constructor(id, content) {
+  constructor(id, code) {
     this.id = id;
-    this.content = content;
+    this.code = code;
   }
 }
 
@@ -116,6 +117,8 @@ class EditorTab {
     // get elements
     EditorTab.container = document.getElementById('tab-container');
     EditorTab.contextMenu = document.getElementById('tab-context-menu');
+    EditorTab.contextRename = document.getElementById('tab-context-rename');
+    EditorTab.contextDelete = document.getElementById('tab-context-delete');
     EditorTab.newBtn = document.getElementById('tab-new');
 
     // init container
@@ -127,22 +130,28 @@ class EditorTab {
     // init new tab button
     EditorTab.newBtn.addEventListener('click', () => {
       const newTab = new EditorTab(new EditorTabOption(`src${EditorTab.counter++}.nim`, ''));
-      // newTab.tab.setAttribute("contenteditable", true);
       EditorTab.tabs.push(newTab);
     });
 
     // init tab context menu
     // https://itnext.io/how-to-create-a-custom-right-click-menu-with-javascript-9c368bb58724
-    // TODO: check name collision when renaming
-    document.addEventListener('click', event => {
-      if (event.target.parentNode != EditorTab.contextMenu)
+    EditorTab.contextMenu.style.display = 'none';
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.addEventListener('mousedown', event => {
+      if (event.target.parentNode != EditorTab.contextMenu) {
         EditorTab.contextMenu.style.display = 'none';
+      }
     });
+    EditorTab.contextRename.addEventListener('mousedown', event => {
+      EditorTab.contextTab.setAttribute('contenteditable', true);
+      EditorTab.contextTab.focus();
+      EditorTab.contextMenu.style.display = 'none';
+    });
+    EditorTab.contextDelete.addEventListener('mousedown', event => {
 
-    // create default tabs
-    EditorTab.createDefault();
+    });
   }
-  static createDefault() {
+  static initStaticTabs() {
     const nimcode =
       `# Keybindings
 # F1           -> command palette
@@ -187,49 +196,79 @@ testE2 A
   constructor(option) {
     // normal tab
     if (option instanceof EditorTabOption) {
-      this.tab = EditorTab.container.appendChild(document.createElement('div'));
+      this.tab = document.createElement('div');
       this.tab.innerText = option.fileName;
-      this.tab.addEventListener('contextmenu', event => {
-        // disable browser context menu
-        event.preventDefault();
-        EditorTab.contextTab = event.target;
+      this.tab.addEventListener('input', event => {
+        if (!this.tab.hasAttribute('contenteditable')) return;
 
-        // move context menu to cursor postion
+        // check name collision
+        let ok = true;
+        if (this.tab.innerText == '' || this.tab.innerText.includes('/')) {
+          ok = false;
+        } else {
+          for (const tab of EditorTab.tabs) {
+            if (tab != this && tab.tab.innerText == this.tab.innerText + '.nim') {
+              ok = false;
+              break;
+            }
+          }
+        }
+
+        if (ok) {
+          this.tab.classList.remove('tab-rename-err');
+          this.tab.classList.add('tab-rename-ok');
+        } else {
+          this.tab.classList.remove('tab-rename-ok');
+          this.tab.classList.add('tab-rename-err');
+        }
+      });
+      this.tab.addEventListener('keydown', event => {
+        if (!this.tab.hasAttribute('contenteditable')) return;
+
+        if (event.key == 'Tab' ||
+          event.key == ' ' ||
+          event.key == '/' ||
+          event.key == '\\' ||
+          event.key == ' ') {
+            event.preventDefault();
+        }
+
+        if (event.key == 'Enter' || event.key == 'Escape') {
+          event.preventDefault();
+          if (this.tab.classList.contains('tab-rename-ok')) {
+            this.tab.innerText += '.nim';
+            this.tab.removeAttribute("contenteditable");
+          }
+        }
+      });
+      this.tab.addEventListener('contextmenu', event => {
+        // show context menu
         EditorTab.contextMenu.style.left = event.clientX + 'px';
         EditorTab.contextMenu.style.top = event.clientY + 'px';
-
-        // show context menu
         EditorTab.contextMenu.style.display = 'block';
+
+        // set selected tab
+        EditorTab.contextTab = event.target;
+
+        console.log(EditorTab.contextTab);
       });
-      // move the new button to rightmost position
-      EditorTab.container.appendChild(EditorTab.newBtn);
-      // create editor model
-      this.model = Monaco.monaco.editor.createModel(option.content, getFileExtension(option.fileName));
+
+      // append elements
+      EditorTab.container.append(this.tab, EditorTab.newBtn);
     }
     // static tab
     else if (option instanceof EditorStaticTabOption) {
       this.tab = document.getElementById(option.id);
-      this.tab.addEventListener('contextmenu', event => {
-        // disable browser context menu
-        event.preventDefault();
-        EditorTab.contextTab = event.target;
-
-        // TODO: use static context meun
-        // move context menu to cursor postion
-        EditorTab.contextMenu.style.left = event.clientX + 'px';
-        EditorTab.contextMenu.style.top = event.clientY + 'px';
-
-        // show context menu
-        EditorTab.contextMenu.style.display = 'block';
-      });
-      // create editor model
-      this.model = Monaco.monaco.editor.createModel(option.content, 'nim');
     }
 
-    this.tab.addEventListener('click', event => {
-      if (event.button == 0) // select this tab on left click
-        this.select();
+    // select this tab on left click
+    this.tab.addEventListener('mousedown', event => {
+      if (this.tab.hasAttribute('contenteditable')) return;
+      if (event.button == 0) this.select();
     });
+
+    // init editor
+    this.model = Monaco.monaco.editor.createModel(option.code, 'nim');
     this.state = null;
   }
 

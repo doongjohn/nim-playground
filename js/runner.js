@@ -37,9 +37,8 @@ function wandboxRun(compiler = "", options = [], mainSrc = "", srcFiles = [], on
 }
 
 let output = null;
-let ctrlDown = false;
 
-function isCtrlPressed(event) {
+function isCtrlDown(event) {
   return navigator.platform.match('Mac') ? event.metaKey : event.ctrlKey;
 }
 
@@ -47,20 +46,17 @@ export function init() {
   // init output window
   output = document.getElementById('output');
 
-  // prevent browser ctrl + s
+  // prevent browser keys
   document.addEventListener('keydown', event => {
-    if (event.key == 's' && isCtrlPressed(event))
-      event.preventDefault();
-  }, false);
+    if (isCtrlDown(event) && event.key == 's') event.preventDefault();
+    if (isCtrlDown(event) && event.key == 'p') event.preventDefault();
+  });
 
   // init keyboard shortcuts
-  window.addEventListener('keyup', e => ctrlDown = e.key == 'Control' ? false : ctrlDown);
   window.addEventListener('keydown', e => {
-    if (e.key == 'Control')
-      ctrlDown = true;
     if (e.key == 'Escape')
       outputWindowHide();
-    if (ctrlDown && e.key == '`')
+    if (isCtrlDown(e) && e.key == '`')
       outputWindowToggle();
   });
 }

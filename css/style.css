@@ -5,6 +5,7 @@ body {
   padding: 0;
   height: 100%;
 }
+
 #tab-bar {
   z-index: 99;
   position: fixed;
@@ -35,6 +36,15 @@ body {
 #tab-container > div:hover {
   background-color: #3f435a;
 }
+.tab-rename-ok {
+  padding-bottom: 0;
+  border-bottom: 0.15em solid #00ff62;
+}
+.tab-rename-err {
+  padding-bottom: 0;
+  border-bottom: 0.15em solid #ff2205;
+}
+
 #tab-context-menu {
   z-index: 200;
   display: none;
@@ -44,16 +54,18 @@ body {
   width: fit-content;
   color: white;
   background-color: hsl(231, 15%, 16%);
+  box-shadow: 0 0 6px hsla(0, 0%, 0%, 0.5);
 }
 #tab-context-menu > div {
   user-select: none;
-  padding: 0.5em 0.5em 0.5em 0.1em;
+  padding: 0.5em 0.5em 0.5em 0;
   width: fit-content;
   height: 100%;
 }
 #tab-context-menu > div:hover {
   background-color: #3f435a;
 }
+
 .monaco-editor {
   margin-top: 35px;
 }
@@ -67,10 +79,8 @@ body {
 #editor {
   width: 100%;
   height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
 }
+
 #output {
   white-space: pre;
   position: absolute;
