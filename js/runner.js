@@ -104,7 +104,7 @@ export function wandboxRunNim(tabs) {
     compilers.nim_head,
     compileOptions,
     tabs[0].getData().code,                  // main src
-    tabs.slice(1).map(tab => tab.getData()), // every other src (TODO: run only nim files)
+    tabs.slice(1).map(tab => tab.getData()), // every other src
     outputWindowUpdate
   );
 }

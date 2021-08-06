@@ -11,7 +11,7 @@ body {
   position: fixed;
   width: 100%;
   height: fit-content;
-  background-color: hsl(231, 15%, 20%);
+  background: hsl(231, 15%, 20%);
 }
 #tab-container {
   display: flex;
@@ -25,24 +25,29 @@ body {
   user-select: none;
   margin-right: 0.1em;
   padding: 0.5em 1em;
-  background-color: hsl(231, 15%, 16%);
+  background: hsl(231, 15%, 16%);
 }
-#tab-container > div:last-child {
+#tab-container > div:last-child { /* new button */
   margin: 0;
 }
 #tab-container > .selected {
-  background-color: #323547;
+  background: #323547;
 }
 #tab-container > div:hover {
-  background-color: #3f435a;
+  background: #3f435a;
+}
+#tab-container > div:focus {
+  outline: none;
 }
 .tab-rename-ok {
   padding-bottom: 0;
   border-bottom: 0.15em solid #00ff62;
+  background: #5e5e5e;
 }
 .tab-rename-err {
   padding-bottom: 0;
   border-bottom: 0.15em solid #ff2205;
+  background: #5e5e5e;
 }
 
 #tab-context-menu {
@@ -53,7 +58,7 @@ body {
   font-family: 'JetBrains Mono';
   width: fit-content;
   color: white;
-  background-color: hsl(231, 15%, 16%);
+  background: hsl(231, 15%, 16%);
   box-shadow: 0 0 6px hsla(0, 0%, 0%, 0.5);
 }
 #tab-context-menu > div {
@@ -63,7 +68,7 @@ body {
   height: 100%;
 }
 #tab-context-menu > div:hover {
-  background-color: #3f435a;
+  background: #3f435a;
 }
 
 .monaco-editor {
@@ -107,14 +112,14 @@ body {
   width: 20px;
 }
 #output::-webkit-scrollbar-track {
-  background-color: transparent;
+  background: transparent;
 }
 #output::-webkit-scrollbar-thumb {
-  background-color: #2b2b2b;
+  background: #2b2b2b;
   border-radius: 20px;
   border: 6px solid transparent;
   background-clip: content-box;
 }
 #output::-webkit-scrollbar-thumb:hover {
-  background-color: #303030;
+  background: #303030;
 }

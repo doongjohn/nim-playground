@@ -123,18 +123,19 @@ class EditorTab {
 
     // init container
     EditorTab.container.addEventListener('wheel', function (event) {
-      // side scroll
-      this.scrollLeft += event.deltaY > 0 ? 50 : -50;
+      this.scrollLeft += event.deltaY > 0 ? 50 : -50; // side scroll
     });
 
     // init new tab button
     EditorTab.newBtn.addEventListener('click', () => {
-      const newTab = new EditorTab(new EditorTabOption(`src${EditorTab.counter++}.nim`, ''));
+      let newFileName = `src${EditorTab.counter++}`;
+      while (!EditorTab.okFileNameStr(newFileName))
+        newFileName = `src${EditorTab.counter++}`;
+      const newTab = new EditorTab(new EditorTabOption(newFileName + '.nim', ''));
       EditorTab.tabs.push(newTab);
     });
 
     // init tab context menu
-    // https://itnext.io/how-to-create-a-custom-right-click-menu-with-javascript-9c368bb58724
     EditorTab.contextMenu.style.display = 'none';
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.addEventListener('mousedown', event => {
@@ -142,22 +143,39 @@ class EditorTab {
         EditorTab.contextMenu.style.display = 'none';
       }
     });
-    EditorTab.contextRename.addEventListener('mousedown', event => {
-      EditorTab.contextTab.setAttribute('contenteditable', true);
-      EditorTab.contextTab.focus();
-      EditorTab.contextMenu.style.display = 'none';
-    });
-    EditorTab.contextDelete.addEventListener('mousedown', event => {
 
+    // tab context menu rename
+    EditorTab.contextRename.addEventListener('mousedown', event => {
+      EditorTab.contextMenu.style.display = 'none';
+      EditorTab.contextTab.setAttribute('contenteditable', true);
+      EditorTab.contextTab.innerText = EditorTab.contextTab.innerText.slice(0, -4);
+      setTimeout(() => {
+        EditorTab.contextTab.focus();
+        document.execCommand('selectAll', false);
+      }, 0);
+    });
+
+    // tab context menu delete
+    EditorTab.contextDelete.addEventListener('mousedown', event => {
+      EditorTab.contextMenu.style.display = 'none';
+      for (let i in EditorTab.tabs) {
+        if (EditorTab.tabs[i].tab == EditorTab.contextTab) {
+          EditorTab.contextTab.remove();
+          EditorTab.tabs.splice(i, 1);
+          EditorTab.tabs[i == 2 ? 0 : i - 1].select();
+          break;
+        }
+      }
     });
   }
   static initStaticTabs() {
-    const nimcode =
-      `# Keybindings
+    const nimcode = `# Keybindings:
 # F1           -> command palette
 # ctrl + enter -> run your nim code
 # ctrl + \`     -> toggle the output window
 # esc          -> hide the output window
+
+# INFO: prog.nim is the main module
 
 {.experimental: "overloadableEnums".}
 
@@ -174,13 +192,9 @@ proc testE1(e: E1) = echo typeof e
 proc testE2(e: E2) = echo typeof e
 
 testE1 A
-testE2 A
-`
+testE2 A`
 
-    const nimconfig =
-      `--define: "release"
---gc: "orc"
-`
+    const nimconfig = `--define: "release"\n--gc: "orc"`
 
     // default tabs
     EditorTab.tabs = [
@@ -192,6 +206,26 @@ testE2 A
     EditorTab.currentTab = EditorTab.tabs[0];
     EditorTab.currentTab.select();
   }
+  static okFileNameStr(fileName) {
+    if (fileName == '')
+      return false;
+
+    for (const tab of EditorTab.tabs)
+      if (tab.tab.innerText == fileName + '.nim')
+        return false;
+
+    return true;
+  }
+  static okFileName(tabElem) {
+    if (tabElem.innerText == '')
+      return false;
+
+    for (const tab of EditorTab.tabs)
+      if (tab.tab != tabElem && tab.tab.innerText == tabElem.innerText + '.nim')
+        return false;
+
+    return true;
+  }
 
   constructor(option) {
     // normal tab
@@ -202,19 +236,7 @@ testE2 A
         if (!this.tab.hasAttribute('contenteditable')) return;
 
         // check name collision
-        let ok = true;
-        if (this.tab.innerText == '' || this.tab.innerText.includes('/')) {
-          ok = false;
-        } else {
-          for (const tab of EditorTab.tabs) {
-            if (tab != this && tab.tab.innerText == this.tab.innerText + '.nim') {
-              ok = false;
-              break;
-            }
-          }
-        }
-
-        if (ok) {
+        if (EditorTab.okFileName(this.tab)) {
           this.tab.classList.remove('tab-rename-err');
           this.tab.classList.add('tab-rename-ok');
         } else {
@@ -225,19 +247,16 @@ testE2 A
       this.tab.addEventListener('keydown', event => {
         if (!this.tab.hasAttribute('contenteditable')) return;
 
-        if (event.key == 'Tab' ||
-          event.key == ' ' ||
-          event.key == '/' ||
-          event.key == '\\' ||
-          event.key == ' ') {
-            event.preventDefault();
-        }
+        // check forbidden character input
+        if (['Tab', ' ', '/', '\\'].includes(event.key))
+          event.preventDefault();
 
-        if (event.key == 'Enter' || event.key == 'Escape') {
+        if (['Enter', 'Escape'].includes(event.key)) {
           event.preventDefault();
           if (this.tab.classList.contains('tab-rename-ok')) {
-            this.tab.innerText += '.nim';
+            this.tab.classList.remove('tab-rename-ok');
             this.tab.removeAttribute("contenteditable");
+            this.tab.innerText += '.nim';
           }
         }
       });
@@ -249,8 +268,6 @@ testE2 A
 
         // set selected tab
         EditorTab.contextTab = event.target;
-
-        console.log(EditorTab.contextTab);
       });
 
       // append elements
