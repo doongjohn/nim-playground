@@ -128,7 +128,7 @@ class EditorTab {
 
     // init new tab button
     EditorTab.newBtn.addEventListener('click', () => {
-      let newFileName = `src${EditorTab.counter++}`;
+      let newFileName = `src${EditorTab.counter}`;
       while (!EditorTab.okFileNameStr(newFileName))
         newFileName = `src${EditorTab.counter++}`;
       const newTab = new EditorTab(new EditorTabOption(newFileName + '.nim', ''));
@@ -139,13 +139,28 @@ class EditorTab {
     EditorTab.contextMenu.style.display = 'none';
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.addEventListener('mousedown', event => {
-      if (event.target.parentNode != EditorTab.contextMenu) {
+      if (!EditorTab.contextMenu.contains(event.target)) {
         EditorTab.contextMenu.style.display = 'none';
+
+        for (const tab of EditorTab.tabs) {
+          if (!tab.tab.hasAttribute('contenteditable'))
+            continue;
+          if (!EditorTab.okFileNameStr(tab.tab.innerText)) {
+            let newFileName = `src${EditorTab.counter}`;
+            while (!EditorTab.okFileNameStr(newFileName))
+              newFileName = `src${EditorTab.counter++}`;
+            tab.tab.innerText = newFileName + '.nim';
+            tab.tab.classList.remove('tab-rename-err');
+          } else {
+            tab.tab.innerText = tab.tab.innerText + '.nim';
+          }
+          tab.tab.removeAttribute('contenteditable');
+        }
       }
     });
 
     // tab context menu rename
-    EditorTab.contextRename.addEventListener('mousedown', event => {
+    EditorTab.contextRename.addEventListener('mouseup', event => {
       EditorTab.contextMenu.style.display = 'none';
       EditorTab.contextTab.setAttribute('contenteditable', true);
       EditorTab.contextTab.innerText = EditorTab.contextTab.innerText.slice(0, -4);
