@@ -145,12 +145,12 @@ class EditorTab {
       EditorTab.contextTab.setAttribute('contenteditable', true);
 
       // check name collision
-      if (EditorTab.isUniqueFileName(this.tab)) {
-        this.tab.classList.remove('tab-rename-err');
-        this.tab.classList.add('tab-rename-ok');
+      if (EditorTab.isUniqueFileName(EditorTab.contextTab)) {
+        EditorTab.contextTab.classList.remove('tab-rename-err');
+        EditorTab.contextTab.classList.add('tab-rename-ok');
       } else {
-        this.tab.classList.remove('tab-rename-ok');
-        this.tab.classList.add('tab-rename-err');
+        EditorTab.contextTab.classList.remove('tab-rename-ok');
+        EditorTab.contextTab.classList.add('tab-rename-err');
       }
 
       setTimeout(() => {
