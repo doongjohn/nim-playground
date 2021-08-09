@@ -22,7 +22,6 @@ importScripts('https://unpkg.com/monaco-editor@latest/min/vs/base/worker/workerM
 class Monaco {
   static monaco = null;
   static editor = null;
-
   static init() {
     const monaco = Monaco.monaco;
     monaco.editor.defineTheme('dracula', Theme.dracula);
@@ -57,8 +56,8 @@ class Monaco {
       label: 'Run Nim',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
       run: function (ed) {
-        Runner.outputWindowText('sending a request to wandbox api...');
-        Runner.outputWindowShow();
+        Runner.OutputWindow.setText('sending a request to wandbox api...');
+        Runner.OutputWindow.show();
         Runner.wandboxRunNim(EditorTab.tabs);
         return null;
       }
@@ -68,24 +67,11 @@ class Monaco {
       label: 'Toggle Output Window',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_BACKTICK],
       run: function (ed) {
-        Runner.outputWindowToggle();
+        Runner.OutputWindow.toggle();
         return null;
       }
     });
   }
-}
-
-function getFileExtension(fileName) {
-  const fileTypes = {
-    nim: 'nim',
-    nims: 'nim',
-    txt: 'text',
-  }
-
-  const dot = fileName.lastIndexOf('.');
-  if (dot == -1 || fileName.length == dot - 1)
-    return 'text';
-  return fileTypes[fileName.substring(dot + 1)];
 }
 
 class EditorTabOption {
@@ -128,10 +114,7 @@ class EditorTab {
 
     // init new tab button
     EditorTab.newBtn.addEventListener('click', () => {
-      let newFileName = `src${EditorTab.counter}`;
-      while (!EditorTab.okFileNameStr(newFileName))
-        newFileName = `src${EditorTab.counter++}`;
-      const newTab = new EditorTab(new EditorTabOption(newFileName + '.nim', ''));
+      const newTab = new EditorTab(new EditorTabOption(EditorTab.makeUniqueFileName() + '.nim', ''));
       EditorTab.tabs.push(newTab);
     });
 
@@ -145,15 +128,11 @@ class EditorTab {
         for (const tab of EditorTab.tabs) {
           if (!tab.tab.hasAttribute('contenteditable'))
             continue;
-          if (!EditorTab.okFileNameStr(tab.tab.innerText)) {
-            let newFileName = `src${EditorTab.counter}`;
-            while (!EditorTab.okFileNameStr(newFileName))
-              newFileName = `src${EditorTab.counter++}`;
-            tab.tab.innerText = newFileName + '.nim';
-            tab.tab.classList.remove('tab-rename-err');
-          } else {
-            tab.tab.innerText = tab.tab.innerText + '.nim';
-          }
+          // when unfocused from a tab while renaming it
+          if (!EditorTab.isUniqueFileNameStr(tab.tab.innerText))
+            tab.tab.innerText = EditorTab.makeUniqueFileName();
+          tab.tab.innerText += '.nim';
+          tab.tab.className = '';
           tab.tab.removeAttribute('contenteditable');
         }
       }
@@ -221,7 +200,14 @@ testE2 A`
     EditorTab.currentTab = EditorTab.tabs[0];
     EditorTab.currentTab.select();
   }
-  static okFileNameStr(fileName) {
+
+  static makeUniqueFileName() {
+    let result = `src${EditorTab.counter}`;
+    while (!EditorTab.isUniqueFileNameStr(result))
+      result = `src${EditorTab.counter++}`;
+    return result;
+  }
+  static isUniqueFileNameStr(fileName) {
     if (fileName == '')
       return false;
 
@@ -231,7 +217,7 @@ testE2 A`
 
     return true;
   }
-  static okFileName(tabElem) {
+  static isUniqueFileName(tabElem) {
     if (tabElem.innerText == '')
       return false;
 
@@ -251,7 +237,7 @@ testE2 A`
         if (!this.tab.hasAttribute('contenteditable')) return;
 
         // check name collision
-        if (EditorTab.okFileName(this.tab)) {
+        if (EditorTab.isUniqueFileName(this.tab)) {
           this.tab.classList.remove('tab-rename-err');
           this.tab.classList.add('tab-rename-ok');
         } else {
@@ -268,11 +254,11 @@ testE2 A`
 
         if (['Enter', 'Escape'].includes(event.key)) {
           event.preventDefault();
-          if (this.tab.classList.contains('tab-rename-ok')) {
-            this.tab.classList.remove('tab-rename-ok');
-            this.tab.removeAttribute("contenteditable");
-            this.tab.innerText += '.nim';
-          }
+          if (this.tab.classList.contains('tab-rename-err'))
+            this.tab.innerText = EditorTab.makeUniqueFileName();
+          this.tab.innerText += '.nim';
+          this.tab.className = '';
+          this.tab.removeAttribute("contenteditable");
         }
       });
       this.tab.addEventListener('contextmenu', event => {
@@ -283,6 +269,15 @@ testE2 A`
 
         // set selected tab
         EditorTab.contextTab = event.target;
+
+        // check name collision
+        if (EditorTab.isUniqueFileName(this.tab)) {
+          this.tab.classList.remove('tab-rename-err');
+          this.tab.classList.add('tab-rename-ok');
+        } else {
+          this.tab.classList.remove('tab-rename-ok');
+          this.tab.classList.add('tab-rename-err');
+        }
       });
 
       // append elements
@@ -303,16 +298,12 @@ testE2 A`
     this.model = Monaco.monaco.editor.createModel(option.code, 'nim');
     this.state = null;
   }
-
   getData() {
     return {
       // this naming is for the wandbox api
       file: this.tab.innerText,   // file name
       code: this.model.getValue() // file content
     };
-  }
-  rename(fileName) {
-    Monaco.monaco.editor.setModelLanguage(this.model, getFileExtension(fileName));
   }
   remove() {
     let index = EditorTab.tabs.indexOf(this);
@@ -326,7 +317,6 @@ testE2 A`
   select() {
     EditorTab.currentTab?.deselect();
     EditorTab.currentTab = this;
-
     Monaco.editor.setModel(this.model);
     Monaco.editor.restoreViewState(this.state);
     Monaco.editor.focus();

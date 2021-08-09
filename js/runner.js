@@ -36,58 +36,70 @@ function wandboxRun(compiler = "", options = [], mainSrc = "", srcFiles = [], on
   }).catch(error => console.error(error));
 }
 
-let output = null;
+
+export class OutputWindow {
+  static element = null;
+  static init() {
+    OutputWindow.element = document.getElementById('output');
+  }
+  static setText(text) {
+    OutputWindow.element.textContent = text;
+  }
+  static show() {
+    OutputWindow.element.style.display = '';
+  }
+  static hide() {
+    OutputWindow.element.style.display = 'none';
+  }
+  static toggle() {
+    OutputWindow.element.style.display ? OutputWindow.show() : OutputWindow.hide();
+  }
+  static update(msg) {
+    const { type, data } = msg;
+    switch (type) {
+      case 'Control':
+        OutputWindow.element.textContent += `> 🎁 [Wandbox]: ${data}\n`;
+        break;
+      case 'ExitCode':
+        OutputWindow.element.textContent += `> 📑 [ExitCode]: ${data}\n`;
+        break;
+      default:
+        // TODO: parse ansi code -> https://github.com/drudru/ansi_up
+        OutputWindow.element.textContent += data;
+    }
+    // scroll to bottom
+    OutputWindow.element.scrollTop = OutputWindow.element.scrollHeight;
+  }
+}
+
 
 function isCtrlDown(event) {
   return navigator.platform.match('Mac') ? event.metaKey : event.ctrlKey;
 }
+function isCtrlPlusAnyKey(event, ...keys) {
+  return isCtrlDown(event) && [...keys].includes(event.key);
+}
+
 
 export function init() {
   // init output window
-  output = document.getElementById('output');
+  OutputWindow.init();
 
   // prevent browser keys
-  document.addEventListener('keydown', event => {
-    if (isCtrlDown(event) && event.key == 's') event.preventDefault();
-    if (isCtrlDown(event) && event.key == 'p') event.preventDefault();
+  document.addEventListener('keydown', e => {
+    isCtrlPlusAnyKey(e, 's', 'p') && e.preventDefault();
   });
 
   // init keyboard shortcuts
   window.addEventListener('keydown', e => {
+    // hide output window
     if (e.key == 'Escape')
-      outputWindowHide();
-    if (isCtrlDown(e) && e.key == '`')
-      outputWindowToggle();
-  });
-}
-export function outputWindowText(str) {
-  output.textContent = str;
-}
-export function outputWindowShow() {
-  output.style.display = '';
-}
-export function outputWindowHide() {
-  output.style.display = 'none';
-}
-export function outputWindowToggle() {
-  output.style.display ? outputWindowShow() : outputWindowHide();
-}
+      OutputWindow.hide();
 
-function outputWindowUpdate(msg) {
-  const str = msg.data;
-  switch (msg.type) {
-    case 'Control':
-      output.textContent += '> 🎁 [Wandbox]: ' + str + '\n';
-      break;
-    case 'ExitCode':
-      output.textContent += '> 📑 [ExitCode]: ' + str + '\n';
-      break;
-    default:
-      // TODO: parse ansi code -> https://github.com/drudru/ansi_up
-      output.textContent += str;
-  }
-  // scroll to bottom
-  output.scrollTop = output.scrollHeight;
+    // toggle output window
+    if (isCtrlPlusAnyKey(e, '`'))
+      OutputWindow.toggle();
+  });
 }
 
 
@@ -95,6 +107,7 @@ function outputWindowUpdate(msg) {
 const compilers = Object.freeze({
   nim_head: 'nim-head',
 });
+// TODO: do I really need this?
 let compileOptions = [''];
 
 
@@ -104,7 +117,7 @@ export function wandboxRunNim(tabs) {
     compilers.nim_head,
     compileOptions,
     tabs[0].getData().code,                  // main src
-    tabs.slice(1).map(tab => tab.getData()), // every other src
-    outputWindowUpdate
+    tabs.slice(1).map(tab => tab.getData()), // other src
+    OutputWindow.update
   );
 }
