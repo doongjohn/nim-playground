@@ -141,8 +141,18 @@ class EditorTab {
     // tab context menu rename
     EditorTab.contextRename.addEventListener('mouseup', event => {
       EditorTab.contextMenu.style.display = 'none';
-      EditorTab.contextTab.setAttribute('contenteditable', true);
       EditorTab.contextTab.innerText = EditorTab.contextTab.innerText.slice(0, -4);
+      EditorTab.contextTab.setAttribute('contenteditable', true);
+
+      // check name collision
+      if (EditorTab.isUniqueFileName(this.tab)) {
+        this.tab.classList.remove('tab-rename-err');
+        this.tab.classList.add('tab-rename-ok');
+      } else {
+        this.tab.classList.remove('tab-rename-ok');
+        this.tab.classList.add('tab-rename-err');
+      }
+
       setTimeout(() => {
         EditorTab.contextTab.focus();
         document.execCommand('selectAll', false);
@@ -269,15 +279,6 @@ testE2 A`
 
         // set selected tab
         EditorTab.contextTab = event.target;
-
-        // check name collision
-        if (EditorTab.isUniqueFileName(this.tab)) {
-          this.tab.classList.remove('tab-rename-err');
-          this.tab.classList.add('tab-rename-ok');
-        } else {
-          this.tab.classList.remove('tab-rename-ok');
-          this.tab.classList.add('tab-rename-err');
-        }
       });
 
       // append elements
