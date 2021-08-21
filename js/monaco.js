@@ -179,24 +179,19 @@ class EditorTab {
 # ctrl + \`     -> toggle the output window
 # esc          -> hide the output window
 
-# INFO: prog.nim is the main module
+# Other Nim playgrounds
+# - play.nim-lang.org        (nim version: 1.4.8 and lower)
+# - wandbox.org/#nim         (nim version: 1.5.1 and lower)
+# - riju.codes/nim           (nim version: 1.4.2)
+# - replit.com/languages/nim (nim version: 1.2.0)
 
-{.experimental: "overloadableEnums".}
+# INFO: prog.nim is the main module
 
 import std/strformat
 
-const nim = "awesome"
-echo "{nim = }".fmt
-
-type
-  E1 = enum A, B
-  E2 = enum A, B
-
-proc testE1(e: E1) = echo typeof e
-proc testE2(e: E2) = echo typeof e
-
-testE1 A
-testE2 A`
+echo "nim version: {NimVersion}".fmt
+echo "Hello world!"
+`
 
     const nimconfig = `--define: "release"\n--gc: "orc"`
 
