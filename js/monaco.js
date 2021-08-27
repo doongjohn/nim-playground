@@ -35,7 +35,6 @@ class Monaco {
       padding: { top: "15em" },
       smoothScrolling: true,
       mouseWheelZoom: true,
-      cursorSmoothCaretAnimation: true,
       renderWhitespace: 'trailing',
       minimap: { enabled: false },
       suggest: {
