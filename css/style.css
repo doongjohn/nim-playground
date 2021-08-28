@@ -39,6 +39,10 @@ body {
 #tab-container > div:focus {
   outline: none;
 }
+.tab-static {
+  padding-bottom:0;
+  border-bottom:0.15em solid #aaaaaa;
+}
 .tab-rename-ok {
   padding-bottom: 0;
   border-bottom: 0.15em solid #00ff62;
