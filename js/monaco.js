@@ -178,18 +178,21 @@ class EditorTab {
 # ctrl + \`     -> toggle the output window
 # esc          -> hide the output window
 
-# Other Nim playgrounds
-# - play.nim-lang.org        (nim version: 1.4.8 and lower)
-# - wandbox.org/#nim         (nim version: 1.5.1 and lower)
-# - riju.codes/nim           (nim version: 1.4.2)
-# - replit.com/languages/nim (nim version: 1.2.0)
-
 # INFO: prog.nim is the main module
+
 
 import std/strformat
 
-echo "nim version: {NimVersion}".fmt
 echo "Hello world!"
+echo "nim version: {NimVersion}".fmt
+
+
+# Other Nim playgrounds
+# - play.nim-lang.org
+# - wandbox.org/#nim
+# - riju.codes/nim
+# - ryugod.com/pages/ide/nim
+# - replit.com/languages/nim
 `
 
     const nimconfig = `--hint: "Conf:off"
