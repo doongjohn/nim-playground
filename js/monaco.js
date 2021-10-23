@@ -195,7 +195,9 @@ echo "nim version: {NimVersion}".fmt
 # - replit.com/languages/nim
 `
 
-    const nimconfig = `--hint: "Conf:off"
+    const nimconfig = `# INFO: https://nim-lang.org/docs/nimc.html#compiler-usage-commandminusline-switches
+
+--hint: "Conf:off"
 --hint: "Link:off"
 --hint: "SuccessX:off"
 
