@@ -192,7 +192,13 @@ echo "nim version: {NimVersion}".fmt
 echo "Hello world!"
 `
 
-    const nimconfig = `--define: "release"\n--gc: "orc"`
+    const nimconfig = `--hint: "Conf:off"
+--hint: "Link:off"
+--hint: "SuccessX:off"
+
+--define: "release"
+--gc: "orc"
+`
 
     // default tabs
     EditorTab.tabs = [
