@@ -139,11 +139,11 @@ export const highlighter = {
 
     comments: [
       [/#(?!\[).*/, 'comment'],
-      [/#\[/, 'comment', '@endComments'],
+      [/#\[[^\]#]*/, 'comment', '@innerComments'],
     ],
-    endComments: [
-      [/#\[/, 'comment', '@endComments'],
-      [/\]#/, 'comment', '@pop'],
+    innerComments: [
+      [/#\[/, 'comment', '@innerComments'],
+      [/[^\]#]*\]#/, 'comment', '@pop'],
       [/.*/, 'comment'],
     ],
   }
