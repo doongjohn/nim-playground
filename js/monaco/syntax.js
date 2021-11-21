@@ -68,14 +68,17 @@ export const highlighter = {
 
   escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
   specialchars: /\.|:|\+|-|\*|\/|=|>|<|&|\||%|!|\?|~|@|\^|`|\$/,
-  typeident: /[A-Z]+\w*/,
   ident: /[a-z]+\w*/,
+  typeident: /[A-Z]+\w*/,
   procdefs: /proc|func|method|iterator|converter|template|macro/,
 
   tokenizer: {
     root: [
       { include: '@whitespace' },
       { include: '@numbers' },
+      { include: '@strings' },
+      { include: '@pragmas' },
+      { include: '@comments' },
 
       [/[{}()\[\]]/, '@brackets'],
       [/[,;]/, 'delimiter'],
@@ -88,9 +91,13 @@ export const highlighter = {
       [/(')([a-z]\w*)/, ['keyword.operator', 'type']],
       [/(')(@escapes)(')/, ['string', 'string.escape', 'string']],
 
-      // keyword, type, operator
+      // type
       [/@typeident/, 'type'],
+
+      // operator
       [/(@specialchars)+/, 'keyword.operator'],
+
+      // keyword, type
       [/@ident/, {
         cases: {
           '@keywords': 'keyword',
@@ -103,20 +110,6 @@ export const highlighter = {
 
     whitespace: [
       [/\s+/, 'white'],
-      [/""".*"""/, 'string'],
-      [/""".*/, 'string', '@endMultiLineString'],
-      [/#(?!\[).*/, 'comment'],
-      [/#\[.*/, 'comment', '@endMultiLineComment'],
-    ],
-    // NOTE: nested comments does not work
-    endMultiLineComment: [
-      [/.*\]#/, 'comment', '@popall'],
-      [/.*/, 'comment']
-    ],
-    endMultiLineString: [
-      [/\\"/, 'string'],
-      [/.*"""/, 'string', '@popall'],
-      [/.*/, 'string']
     ],
 
     numbers: [
@@ -125,6 +118,33 @@ export const highlighter = {
       [/[-+]?0[xX]([_a-f0-9]*)/, 'number'],       // hexadecimal
       [/(?=[-+]?[0-9]+)[e\-0-9]+/, 'number'],     // int
       [/[-+]?[0-9]*\.[0-9]+[e\-0-9]+/, 'number'], // float
+    ],
+
+    strings: [
+      [/""".*"""/, 'string'],
+      [/""".*/, 'string', '@endStrings'],
+    ],
+    endStrings: [
+      [/.*"""/, 'string', '@popall'],
+      [/.*/, 'string']
+    ],
+
+    pragmas: [
+      [/\{\./, 'tag', '@endPragmas'],
+    ],
+    endPragmas: [
+      [/.*\.\}/, 'tag', '@popall'],
+      [/.*/, 'tag'],
+    ],
+
+    comments: [
+      [/#(?!\[).*/, 'comment'],
+      [/#\[/, 'comment', '@endComments'],
+    ],
+    endComments: [
+      [/#\[/, 'comment', '@endComments'],
+      [/\]#/, 'comment', '@pop'],
+      [/.*/, 'comment'],
     ],
   }
 };
