@@ -46,7 +46,7 @@ class Monaco {
       tabSize: 2,
       fontFamily: '"JetBrains Mono", monospace',
       fontSize: '16px',
-      lineHeight: 28,
+      lineHeight: 30,
       theme: 'dracula',
       language: 'nim',
     });
