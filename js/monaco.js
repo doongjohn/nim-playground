@@ -173,27 +173,24 @@ class EditorTab {
     });
   }
   static initStaticTabs() {
-    const nimcode = `# Keybindings:
-# F1           -> command palette
-# ctrl + enter -> run your nim code
-# ctrl + \`     -> toggle the output window
-# esc          -> hide the output window
-
-# INFO: prog.nim is the main module
-
-
-import std/strformat
+    const nimcode = `import std/strformat
 
 echo "Hello world!"
 echo "nim version: {NimVersion}".fmt
 
 
-# Other Nim playgrounds
-# - play.nim-lang.org
-# - wandbox.org/#nim
-# - riju.codes/nim
-# - ryugod.com/pages/ide/nim
-# - replit.com/languages/nim
+# Keybindings:
+# F1           -> open command palette
+# ctrl + enter -> execute prog.nim
+# ctrl + \`     -> toggle output window
+# esc          -> hide output window
+
+# Other Nim playgrounds:
+# - https://play.nim-lang.org
+# - https://wandbox.org/#nim
+# - https://riju.codes/nim
+# - https://ryugod.com/pages/ide/nim
+# - https://replit.com/languages/nim
 `
 
     const nimconfig = `# INFO: https://nim-lang.org/docs/nimc.html#compiler-usage-commandminusline-switches
