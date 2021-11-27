@@ -187,7 +187,7 @@ echo "nim version: {NimVersion}".fmt
 
 # Other Nim playgrounds:
 # - https://play.nim-lang.org
-# - https://wandbox.org/#nim
+# - https://wandbox.org
 # - https://riju.codes/nim
 # - https://ryugod.com/pages/ide/nim
 # - https://replit.com/languages/nim
