@@ -5,6 +5,7 @@ const decoder = new TextDecoder();
 let wandboxstream = null;
 
 function wandboxRun(compiler = "", options = [], mainSrc = "", srcFiles = [], onReceiveData) {
+  OutputWindow.element.textContent += 'Sending your code to the wandbox api...\n'
   postData('https://wandbox.org/api/compile.ndjson', {
     compiler: compiler,
     'compiler-option-raw': options.join('\n'),
@@ -25,8 +26,10 @@ function wandboxRun(compiler = "", options = [], mainSrc = "", srcFiles = [], on
 
             controller.enqueue(value);
             const jsons = decoder.decode(value).split('\n');
-            for (const json of (jsons.pop(), jsons))
+            jsons.pop() // discard first value of the jsons
+            for (const json of jsons){
               onReceiveData(JSON.parse(json));
+            }
 
             loop();
           });
@@ -72,9 +75,10 @@ export class OutputWindow {
   }
 }
 
+let platfrom = navigator?.userAgentData?.platform || navigator?.platform || 'unknown'
 
 function isCtrlDown(event) {
-  return navigator.platform.match('Mac') ? event.metaKey : event.ctrlKey;
+  return platfrom.match('Mac') ? event.metaKey : event.ctrlKey;
 }
 function isCtrlPlusAnyKey(event, ...keys) {
   return isCtrlDown(event) && [...keys].includes(event.key);
@@ -105,7 +109,7 @@ export function init() {
 
 // TODO: get all nim compilers from wandbox
 const compilers = Object.freeze({
-  nim_head: 'nim-head',
+  nim_164: 'nim-1.6.4',
 });
 // TODO: do I really need this?
 let compileOptions = [''];
@@ -114,7 +118,7 @@ let compileOptions = [''];
 export function wandboxRunNim(tabs) {
   output.innerText = '';
   wandboxRun(
-    compilers.nim_head,
+    compilers.nim_164,
     compileOptions,
     tabs[0].getData().code,                  // main src
     tabs.slice(1).map(tab => tab.getData()), // other src
