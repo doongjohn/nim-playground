@@ -198,9 +198,10 @@ echo "nim version: {NimVersion}".fmt
 --hint: "Conf:off"
 --hint: "Link:off"
 --hint: "SuccessX:off"
+# --hints: "off"
 
---define: "release"
 --gc: "orc"
+# --define: "release"
 `
 
     // default tabs
