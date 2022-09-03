@@ -1,5 +1,9 @@
 export const settings = {
-  brackets: [["{", "}"], ["[", "]"], ["(", ")"]],
+  brackets: [
+    ['{', '}'],
+    ['[', ']'],
+    ['(', ')'],
+  ],
   surroundingPairs: [
     { open: '#[', close: ']#' },
     { open: '{', close: '}' },
@@ -15,18 +19,16 @@ export const settings = {
     { open: '"', close: '"', notIn: ['string', 'comment'] },
   ],
   comments: {
-    lineComment: "#",
-    blockComment: ["#[", "]#"]
-  }
-};
+    lineComment: '#',
+    blockComment: ['#[', ']#'],
+  },
+}
 
 export const completion = {
   provideCompletionItems: (model, position) => {
-    const wordModel = model.getWordAtPosition(position);
+    const wordModel = model.getWordAtPosition(position)
     const columnBeforeWord =
-      wordModel && wordModel.word.length
-        ? position.column - wordModel.word.length
-        : 0;
+      wordModel && wordModel.word.length ? position.column - wordModel.word.length : 0
 
     // Get all the text content before the "word at cursor"
     var textUntilPosition = model.getValueInRange({
@@ -34,7 +36,7 @@ export const completion = {
       startColumn: 1,
       endLineNumber: position.lineNumber,
       endColumn: Math.abs(columnBeforeWord),
-    });
+    })
 
     // custom snippets
     const snippets = [
@@ -827,21 +829,17 @@ export const completion = {
         insertText: 'cstring',
       },
       // TODO: more stuff
-    ];
+    ]
 
-    let words = [...textUntilPosition.matchAll(/\w+/gi)].map((x) => x[0]);
+    let words = [...textUntilPosition.matchAll(/\w+/gi)].map((x) => x[0])
     if (!words) {
       // No words typed; must be almost at begining... just return snippets
-      return { suggestions: snippets };
+      return { suggestions: snippets }
     }
 
     // Find unique words that do not include my suggestions
-    const labels = snippets.map((s) => s.label.toUpperCase());
-    words = [
-      ...new Set(
-        words.filter((w) => labels.every((l) => l !== w.toUpperCase()))
-      ),
-    ];
+    const labels = snippets.map((s) => s.label.toUpperCase())
+    words = [...new Set(words.filter((w) => labels.every((l) => l !== w.toUpperCase())))]
 
     // Return combined suggestions
     return {
@@ -852,9 +850,9 @@ export const completion = {
             kind: monaco.languages.CompletionItemKind.Text,
             label: w,
             insertText: w,
-          };
+          }
         }),
-      ]
-    };
-  }
-};
+      ],
+    }
+  },
+}
