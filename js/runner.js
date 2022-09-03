@@ -6,35 +6,30 @@ let wandboxstream = null
 
 function wandboxRun(compiler = '', options = [], mainSrc = '', srcFiles = [], onReceiveData) {
   OutputWindow.element.textContent += 'Sending your code to the wandbox api...\n'
-  postData('https://wandbox.org/api/compile.ndjson', {
+  postData('https://wandbox.org/api/compile.json', {
     compiler: compiler,
     'compiler-option-raw': options.join('\n'),
     code: mainSrc,
     codes: srcFiles,
   })
     .then((response) => {
+      console.log(response)
       const reader = response.getReader()
       wandboxstream?.cancel()
       wandboxstream = new ReadableStream({
         start(controller) {
-          ;(function loop() {
-            reader.read().then(({ done, value }) => {
-              if (done) {
-                controller.close()
-                wandboxstream = null
-                return
-              }
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              controller.close()
+              wandboxstream = null
+              return
+            }
 
-              controller.enqueue(value)
-              const jsons = decoder.decode(value).split('\n')
-              jsons.pop() // discard first value of the jsons
-              for (const json of jsons) {
-                onReceiveData(JSON.parse(json))
-              }
-
-              loop()
-            })
-          })()
+            controller.enqueue(value)
+            const json = decoder.decode(value)
+            onReceiveData(JSON.parse(json))
+            console.log(json)
+          })
         },
       })
     })
@@ -58,19 +53,28 @@ export class OutputWindow {
   static toggle() {
     OutputWindow.element.style.display ? OutputWindow.show() : OutputWindow.hide()
   }
-  static update(msg) {
-    const { type, data } = msg
-    switch (type) {
-      case 'Control':
-        OutputWindow.element.textContent += `> 🎁 [Wandbox]: ${data}\n`
-        break
-      case 'ExitCode':
-        OutputWindow.element.textContent += `> 📑 [ExitCode]: ${data}\n`
-        break
-      default:
-        // TODO: parse ansi code -> https://github.com/drudru/ansi_up
-        OutputWindow.element.textContent += data
+  static update(jsonMsg) {
+    OutputWindow.element.textContent += '\n📄> [compiler output]\n'
+    OutputWindow.element.textContent += jsonMsg['compiler_output']
+
+    // NOTE: idk why but wandbox api always gives me compiler error instead of compiler output
+    if (jsonMsg['compiler_error']) {
+      OutputWindow.element.textContent += '\n📄> [compiler error]\n'
+      OutputWindow.element.textContent += jsonMsg['compiler_error']
     }
+
+    // TODO: parse ansi code -> https://github.com/drudru/ansi_up
+    OutputWindow.element.textContent += '\n📄> [program output]\n'
+    OutputWindow.element.textContent += jsonMsg['program_output']
+
+    if (jsonMsg['program_error']) {
+      OutputWindow.element.textContent += '\n📄> [program error]\n'
+      OutputWindow.element.textContent += jsonMsg['program_error']
+    }
+
+    OutputWindow.element.textContent += '\n📄> [exit status]: '
+    OutputWindow.element.textContent += jsonMsg['status']
+
     // scroll to bottom
     OutputWindow.element.scrollTop = OutputWindow.element.scrollHeight
   }
