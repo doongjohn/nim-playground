@@ -183,7 +183,7 @@ class EditorTab {
   static initStaticTabs() {
     const nimcode = `import std/strformat
 
-echo "Hello world!"
+echo "Hello, world!"
 echo "nim version: {NimVersion}".fmt
 
 
