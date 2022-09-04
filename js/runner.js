@@ -28,7 +28,6 @@ function wandboxRun(compiler = '', options = [], mainSrc = '', srcFiles = [], on
             controller.enqueue(value)
             const json = decoder.decode(value)
             onReceiveData(JSON.parse(json))
-            console.log(json)
           })
         },
       })
