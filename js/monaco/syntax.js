@@ -211,13 +211,20 @@ export const highlighter = {
     ],
 
     comments: [
-      [/(?<!\])#(?!\[).*/, 'comment'],
-      [/#\[/, 'comment', '@innerComments'],
+      [/#(?!\[|#\[).*/, 'comment'],
+      [/#{3,}[^\[].*/, 'comment'],
+      [/#\[/, 'comment', '@innerComments'], // nested comment
+      [/##\[/, 'comment', '@innerDocComments'], // nested doc comment
     ],
     innerComments: [
-      [/.*#\[/, 'comment', '@push'],
-      [/.*\]#/, 'comment', '@pop'],
-      [/.*/, 'comment'],
+      [/#\[/, 'comment', '@push'],
+      [/\]#/, 'comment', '@pop'],
+      [/./, 'comment'],
+    ],
+    innerDocComments: [
+      [/##\[/, 'comment', '@push'],
+      [/\]##/, 'comment', '@pop'],
+      [/./, 'comment'],
     ],
   },
 }
