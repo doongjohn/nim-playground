@@ -14,8 +14,3 @@ function postData(url = '', data = {}) {
     body: JSON.stringify(data), // body data type must match "Content-Type" header
   }).then((response) => response.body)
 }
-
-function dropRight(arr) {
-  arr.pop()
-  return arr
-}
