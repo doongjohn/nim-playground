@@ -193,11 +193,13 @@ echo "nim version: {NimVersion}".fmt
 # ctrl + \`     -> toggle output window
 # esc          -> hide output window
 
+# you can add a new tab by pressing the + button
+# you can rename or delete the tab by right-clicking it
+
 # Other Nim playgrounds:
-# - https://play.nim-lang.org
+# - [official] https://play.nim-lang.org
 # - https://wandbox.org
 # - https://riju.codes/nim
-# - https://ryugod.com/pages/ide/nim
 # - https://replit.com/languages/nim
 `
     const nimconfig = `# INFO: https://nim-lang.org/docs/nimc.html#compiler-usage-commandminusline-switches
