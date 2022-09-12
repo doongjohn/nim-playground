@@ -2,10 +2,24 @@
 // ReadableStream: https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
 
 const decoder = new TextDecoder()
+let posted = false
 let wandboxstream = null
 
 function wandboxRun(compiler = '', options = [], mainSrc = '', srcFiles = [], onReceiveData) {
+  // cancle previous stream
+  // TODO: add time out check
+  if (posted) {
+    return
+  }
+
+  posted = true
+
+  const date = new Date()
+  const today = date.today()
+  const time = date.timeNow()
+  OutputWindow.element.textContent = today + ' ' + time + '\n'
   OutputWindow.element.textContent += 'Sending your code to the wandbox api...\n'
+
   postData('https://wandbox.org/api/compile.json', {
     compiler: compiler,
     'compiler-option-raw': options.join('\n'),
@@ -13,21 +27,17 @@ function wandboxRun(compiler = '', options = [], mainSrc = '', srcFiles = [], on
     codes: srcFiles,
   })
     .then((response) => {
-      console.log(response)
       const reader = response.getReader()
-      wandboxstream?.cancel()
       wandboxstream = new ReadableStream({
         start(controller) {
           reader.read().then(({ done, value }) => {
-            if (done) {
-              controller.close()
-              wandboxstream = null
-              return
-            }
-
             controller.enqueue(value)
             const json = decoder.decode(value)
             onReceiveData(JSON.parse(json))
+
+            controller.close()
+            wandboxstream = null
+            posted = false
           })
         },
       })
@@ -115,7 +125,7 @@ const compilers = Object.freeze({
 let compileOptions = ['']
 
 export function wandboxRunNim(tabs) {
-  output.innerText = ''
+  // request wandbox api
   wandboxRun(
     compilers.nim_1_6_6,
     compileOptions,

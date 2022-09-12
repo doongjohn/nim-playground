@@ -63,7 +63,6 @@ class Monaco {
       label: 'Run Nim',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
       run: function(ed) {
-        Runner.OutputWindow.setText('sending a request to wandbox api...')
         Runner.OutputWindow.show()
         Runner.wandboxRunNim(EditorTab.tabs)
         return null
