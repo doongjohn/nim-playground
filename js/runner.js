@@ -3,7 +3,6 @@
 
 const decoder = new TextDecoder()
 let posted = false
-let wandboxstream = null
 
 function wandboxRun(compiler = '', options = [], mainSrc = '', srcFiles = [], onReceiveData) {
   // cancle previous stream
@@ -28,7 +27,7 @@ function wandboxRun(compiler = '', options = [], mainSrc = '', srcFiles = [], on
   })
     .then((response) => {
       const reader = response.getReader()
-      wandboxstream = new ReadableStream({
+      new ReadableStream({
         start(controller) {
           reader.read().then(({ done, value }) => {
             controller.enqueue(value)
@@ -36,7 +35,6 @@ function wandboxRun(compiler = '', options = [], mainSrc = '', srcFiles = [], on
             onReceiveData(JSON.parse(json))
 
             controller.close()
-            wandboxstream = null
             posted = false
           })
         },
