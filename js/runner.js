@@ -19,18 +19,23 @@ function wandboxRun(compiler = '', options = [], mainSrc = '', srcFiles = [], on
   OutputWindow.element.textContent = today + ' ' + time + '\n'
   OutputWindow.element.textContent += 'Sending your code to the wandbox api...\n'
 
-  postData('https://wandbox.org/api/compile.json', {
-    compiler: compiler,
-    'compiler-option-raw': options.join('\n'),
-    code: mainSrc,
-    codes: srcFiles,
-  })
+  postDataWithTimeout(
+    'https://wandbox.org/api/compile.json',
+    {
+      compiler: compiler,
+      'compiler-option-raw': options.join('\n'),
+      code: mainSrc,
+      codes: srcFiles,
+    },
+    15 * 1000 // timeout 15 sec
+  )
     .then((response) => {
       const reader = response.getReader()
       new ReadableStream({
         start(controller) {
           reader.read().then(({ done, value }) => {
             controller.enqueue(value)
+
             const json = decoder.decode(value)
             onReceiveData(JSON.parse(json))
 
@@ -40,7 +45,15 @@ function wandboxRun(compiler = '', options = [], mainSrc = '', srcFiles = [], on
         },
       })
     })
-    .catch((error) => console.error(error))
+    .catch((error) => {
+      if (error.name === 'AbortError') {
+        OutputWindow.element.textContent += '[Error] response timeout\n'
+      } else {
+        OutputWindow.element.textContent += '[Error] ' + error + '\n'
+        console.error(error)
+      }
+      posted = false
+    })
 }
 
 export class OutputWindow {

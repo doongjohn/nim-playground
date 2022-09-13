@@ -1,18 +1,51 @@
-function postData(url = '', data = {}) {
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 8000 } = options
+
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), timeout)
+  const response = await fetch(resource, {
+    ...options,
+    signal: controller.signal,
+  })
+  clearTimeout(id)
+  return response
+}
+
+async function postData(url = '', data = {}) {
   // Default options are marked with *
-  return fetch(url, {
-    method: 'POST', // *GET, POST, PUT, DELETE, etc.
-    mode: 'cors', // no-cors, cors, *same-origin
-    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    credentials: 'same-origin', // include, *same-origin, omit
+  const response = await fetch(url, {
+    method: 'POST',
+    mode: 'cors',
+    cache: 'no-cache',
+    credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
     },
-    redirect: 'follow', // manual, *follow, error
-    referrer: 'no-referrer', // no-referrer, *client
+    redirect: 'follow',
+    referrer: 'no-referrer',
     body: JSON.stringify(data), // body data type must match "Content-Type" header
-  }).then((response) => response.body)
+  })
+  return response.body
+}
+
+async function postDataWithTimeout(url = '', data = {}, timeout) {
+  // Default options are marked with *
+  const response = await fetchWithTimeout(url, {
+    timeout: timeout,
+    method: 'POST',
+    mode: 'cors',
+    cache: 'no-cache',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    },
+    redirect: 'follow',
+    referrer: 'no-referrer',
+    body: JSON.stringify(data), // body data type must match "Content-Type" header
+  })
+  return response.body
 }
 
 Date.prototype.today = function() {
