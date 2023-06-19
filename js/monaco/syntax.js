@@ -5,6 +5,7 @@ export const highlighter = {
     'include',
     'import',
     'from',
+    'export',
 
     'block',
     'when',
@@ -52,8 +53,15 @@ export const highlighter = {
     'varargs',
     'sink',
     'lent',
+    'out',
 
+    'swap',
+    'move',
+    'moveMem',
     'new',
+    'unsafeNew',
+
+    'asm',
     'assert',
     'doAssert',
     'cast',
@@ -74,6 +82,8 @@ export const highlighter = {
     'array',
     'seq',
     'set',
+    'iterable',
+    'owned',
     'openArray',
     'auto',
     'void',

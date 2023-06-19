@@ -189,22 +189,26 @@ class EditorTab {
   static initStaticTabs() {
     const nimCode = `#[
   You can add a new tab by pressing the \`+\` button.
-  You can rename or delete a tab by right-clicking it.
+  You can rename or delete a tab by right-clicking on it.
 
   Key bindings:
     F1           -> open command palette
-    ctrl + enter -> compile and run prog.nim
-    ctrl + \`     -> toggle output window
-    esc          -> hide output window
+    Ctrl + Enter -> compile and run prog.nim
+    Ctrl + \`     -> toggle output window
+    ESC          -> hide output window
 
   Other Nim playgrounds:
     - https://play.nim-lang.org [official]
     - https://wandbox.org
-    - https://riju.codes/nim
     - https://replit.com/languages/nim
 ]#
 
 import std/[strformat, strutils]
+
+
+static:
+  echo staticExec("uname -v")
+  echo staticExec("ls -Al")
 
 
 proc main =
