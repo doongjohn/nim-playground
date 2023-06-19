@@ -49,7 +49,7 @@ async function postDataWithTimeout(url = '', data = {}, timeout) {
   return response.body
 }
 
-Date.prototype.today = function() {
+Date.prototype.today = function () {
   return (
     (this.getDate() < 10 ? '0' : '') +
     this.getDate() +
@@ -61,7 +61,7 @@ Date.prototype.today = function() {
   )
 }
 
-Date.prototype.timeNow = function() {
+Date.prototype.timeNow = function () {
   return (
     (this.getHours() < 10 ? '0' : '') +
     this.getHours() +

@@ -62,7 +62,7 @@ class Monaco {
       id: 'nim-run',
       label: 'Run Nim',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-      run: function(ed) {
+      run: function (ed) {
         Runner.OutputWindow.show()
         Runner.wandboxRunNim(EditorTab.tabs)
         return null
@@ -72,7 +72,7 @@ class Monaco {
       id: 'nim-output-toggle',
       label: 'Toggle Output Window',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_BACKTICK],
-      run: function(ed) {
+      run: function (ed) {
         Runner.OutputWindow.toggle()
         return null
       },
@@ -114,7 +114,7 @@ class EditorTab {
     EditorTab.newBtn = document.getElementById('tab-new')
 
     // init container
-    EditorTab.container.addEventListener('wheel', function(event) {
+    EditorTab.container.addEventListener('wheel', function (event) {
       this.scrollLeft += event.deltaY > 0 ? 50 : -50 // side scroll
     })
 
@@ -148,6 +148,7 @@ class EditorTab {
       EditorTab.contextMenu.style.display = 'none'
       EditorTab.contextTab.innerText = EditorTab.contextTab.innerText.slice(0, -4)
       EditorTab.contextTab.setAttribute('contenteditable', true)
+      EditorTab.contextTab.focus()
 
       // check name collision
       if (EditorTab.isUniqueFileName(EditorTab.contextTab)) {
@@ -158,12 +159,18 @@ class EditorTab {
         EditorTab.contextTab.classList.add('tab-rename-err')
       }
 
-      setTimeout(() => {
-        EditorTab.contextTab.focus()
-
-        // TODO: this is deprecated! find an alternative
-        document.execCommand('selectAll', false)
-      }, 0)
+      // select EditorTab.contextTab.innerText
+      if (window.getSelection && document.createRange) {
+        const range = document.createRange();
+        range.selectNodeContents(EditorTab.contextTab);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      } else if (document.body.createTextRange) {
+        const range = document.body.createTextRange();
+        range.moveToElementText(EditorTab.contextTab);
+        range.select();
+      }
     })
 
     // tab context menu delete
@@ -180,42 +187,51 @@ class EditorTab {
     })
   }
   static initStaticTabs() {
-    const nimcode = `import std/strformat
+    const nimCode = `#[
+  You can add a new tab by pressing the \`+\` button.
+  You can rename or delete a tab by right-clicking it.
 
-echo "Hello, world!"
-echo "nim version: {NimVersion}".fmt
+  Key bindings:
+    F1           -> open command palette
+    ctrl + enter -> compile and run prog.nim
+    ctrl + \`     -> toggle output window
+    esc          -> hide output window
+
+  Other Nim playgrounds:
+    - https://play.nim-lang.org [official]
+    - https://wandbox.org
+    - https://riju.codes/nim
+    - https://replit.com/languages/nim
+]#
+
+import std/[strformat, strutils]
 
 
-# Key bindings:
-# F1           -> open command palette
-# ctrl + enter -> execute prog.nim
-# ctrl + \`     -> toggle output window
-# esc          -> hide output window
+proc main =
+  const text = """
+    Hello, world!
+    Nim version: {NimVersion}
+    """
 
-# you can add a new tab by pressing the + button
-# you can rename or delete the tab by right-clicking it
+  echo text.fmt().dedent().strip()
 
-# Other Nim playgrounds:
-# - [official] https://play.nim-lang.org
-# - https://wandbox.org
-# - https://riju.codes/nim
-# - https://replit.com/languages/nim
+
+main()
 `
-    const nimconfig = `# INFO: https://nim-lang.org/docs/nimc.html#compiler-usage-commandminusline-switches
---define: "release"
+    const nimConfig = `# INFO: https://nim-lang.org/docs/nimc.html#compiler-usage-commandminusline-switches
 
+# --hints: "off"
 --hint: "Link:off"
 --hint: "SuccessX:off"
-# --hints: "off"
 
 --gc: "orc"
-# --define: "release"
+--define: "release"
 `
 
     // default tabs
     EditorTab.tabs = [
-      new EditorTab(new EditorStaticTabOption('code-main', nimcode)),
-      new EditorTab(new EditorStaticTabOption('code-config', nimconfig)),
+      new EditorTab(new EditorStaticTabOption('code-main', nimCode)),
+      new EditorTab(new EditorStaticTabOption('code-config', nimConfig)),
     ]
 
     // select first tab
