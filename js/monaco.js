@@ -53,7 +53,7 @@ class Monaco {
       tabSize: 2,
       fontFamily: '"JetBrains Mono", monospace',
       fontSize: '16px',
-      lineHeight: 30,
+      lineHeight: 28,
       theme: 'dracula',
       language: 'nim',
     })
@@ -205,11 +205,9 @@ class EditorTab {
 
 import std/[strformat, strutils]
 
-
-static:
+static: # this code runs at compile-time
   echo staticExec("uname -v")
   echo staticExec("ls -Al")
-
 
 proc main =
   const text = """
@@ -218,7 +216,6 @@ proc main =
     """
 
   echo text.fmt().dedent().strip()
-
 
 main()
 `
