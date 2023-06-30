@@ -79,7 +79,7 @@ export class OutputWindow {
 
     // NOTE: idk why but wandbox api always gives me compiler error instead of compiler output
     if (jsonMsg['compiler_error']) {
-      OutputWindow.element.textContent += '\n📄> [compiler error]\n'
+      OutputWindow.element.textContent += '\n📄> [compiler message]\n'
       OutputWindow.element.textContent += jsonMsg['compiler_error']
     }
 
