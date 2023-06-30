@@ -6,5 +6,7 @@
 
 ![image](https://github.com/doongjohn/nim-playground/assets/40219740/c268391d-0dd2-42d1-b436-16d4b68e6e96)
 
+---
 
-It uses Nim version `1.6.12`. (currently you can not select the version)
+- Currently you can not select the compiler version.
+- It does not save your code in a local storage. (If you refresh the page, all the code will be lost.)
