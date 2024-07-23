@@ -225,7 +225,7 @@ main()
 --hint: "Link:off"
 --hint: "SuccessX:off"
 
---gc: "orc"
+--mm: "orc"
 --define: "release"
 `
 
