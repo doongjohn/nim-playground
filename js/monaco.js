@@ -62,7 +62,7 @@ class Monaco {
       id: 'nim-run',
       label: 'Run Nim',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-      run: function (ed) {
+      run: function(ed) {
         Runner.OutputWindow.show()
         Runner.wandboxRunNim(EditorTab.tabs)
         return null
@@ -72,7 +72,7 @@ class Monaco {
       id: 'nim-output-toggle',
       label: 'Toggle Output Window',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_BACKTICK],
-      run: function (ed) {
+      run: function(ed) {
         Runner.OutputWindow.toggle()
         return null
       },
@@ -114,7 +114,7 @@ class EditorTab {
     EditorTab.newBtn = document.getElementById('tab-new')
 
     // init container
-    EditorTab.container.addEventListener('wheel', function (event) {
+    EditorTab.container.addEventListener('wheel', function(event) {
       this.scrollLeft += event.deltaY > 0 ? 50 : -50 // side scroll
     })
 
