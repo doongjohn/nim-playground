@@ -131,8 +131,7 @@ export function init() {
 
 // TODO: get all nim compilers from wandbox
 const compilerVersions = Object.freeze({
-  v1_6_20: 'nim-1.6.20',
-  v2_0_8: 'nim-2.0.8',
+  v2_2_0: 'nim-2.2.0',
 })
 // TODO: do I really need this?
 let compileOptions = ['']
@@ -140,7 +139,7 @@ let compileOptions = ['']
 export function wandboxRunNim(tabs) {
   // request wandbox api
   wandboxRun(
-    compilerVersions.v2_0_8,
+    compilerVersions.v2_2_0,
     compileOptions,
     tabs[0].getData().code, // main src
     tabs.slice(1).map((tab) => tab.getData()), // other src
